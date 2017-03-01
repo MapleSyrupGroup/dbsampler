@@ -1,5 +1,5 @@
-quidco/dbsampler
-================
+maple-syrup-group/dbsampler
+===========================
 
 [![Build Status](https://travis-ci.org/MapleSyrupGroup/dbsampler.svg?branch=master)](https://travis-ci.org/MapleSyrupGroup/dbsampler)
 
