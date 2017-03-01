@@ -30,13 +30,6 @@ class Matched extends BaseSampler
     protected $constraints;
 
     /**
-     * Max number to match (default Db order)
-     *
-     * @var integer
-     */
-    protected $limit;
-
-    /**
      * Return a unique name for this sampler for informational purposes
      *
      * @return string
@@ -59,7 +52,6 @@ class Matched extends BaseSampler
     {
         parent::loadConfig($config);
         $this->constraints = (array)$this->demandParameterValue($config, 'constraints');
-        $this->limit = isset($config->limit) ? (int)$config->limit : false;
     }
 
     /**

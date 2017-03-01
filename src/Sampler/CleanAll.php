@@ -56,9 +56,13 @@ class CleanAll extends BaseSampler
      */
     public function getRows()
     {
-        $query = $this->sourceConnection->createQueryBuilder()->select('*')->from($this->tableName)->execute();
+        $query = $this->sourceConnection->createQueryBuilder()->select('*')->from($this->tableName);
 
-        $rows = $query->fetchAll();
+        if ($this->limit) {
+            $query->setMaxResults($this->limit);
+        }
+
+        $rows = $query->execute()->fetchAll();
 
         foreach ($rows as &$row) {
             $this->rowCleaner->cleanRow($row);
