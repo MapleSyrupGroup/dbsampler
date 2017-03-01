@@ -1,0 +1,26 @@
+#!/usr/bin/env php
+
+<?php
+use Quidco\DbSampler\ConsoleRunner;
+
+$ownVendorAutoload = dirname(__DIR__) . '/vendor/autoload.php';
+
+if (file_exists($ownVendorAutoload)) {
+    require $ownVendorAutoload;
+} else {
+    $rpos = strrpos(__DIR__, '/vendor/');
+    if ($rpos !== -1) {
+        $containingVendorDirAutoload = substr(__DIR__, 0, $rpos) . '/vendor/autoload.php';
+        if (file_exists($containingVendorDirAutoload)) {
+            require $containingVendorDirAutoload;
+        }
+    }
+}
+
+if (!class_exists('Quidco\DbSampler\ConsoleRunner')) {
+    echo 'No functional autoloader found';
+    die(-1);
+}
+
+$runner = new ConsoleRunner();
+$runner->run();

@@ -1,0 +1,42 @@
+{
+  "name": "small-sqlite-test",
+  "sourceDb": "small-source",
+  "destDb": "small-dest",
+  "tables": {
+    "fruits": {
+      "sampler": "matched",
+      "constraints": {
+        "name": [
+          "apple",
+          "pear"
+        ]
+      },
+      "remember": {
+        "id": "fruit_ids"
+      }
+    },
+    "vegetables": {
+      "sampler": "NewestById",
+      "idField": "id",
+      "quantity": 2
+    },
+    "fruit_x_basket": {
+      "sampler": "matched",
+      "constraints": {
+        "fruit_id": "$fruit_ids"
+      },
+      "remember": {
+        "basket_id": "basket_ids"
+      }
+    },
+    "baskets": {
+      "sampler": "cleanMatched",
+      "constraints": {
+        "id": "$basket_ids"
+      },
+      "cleanFields": {
+        "name": "fakefullname"
+      }
+    }
+  }
+}

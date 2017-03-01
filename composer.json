@@ -1,0 +1,39 @@
+{
+    "name": "maple-syrup-group/dbsampler",
+    "description": "Rule-based generation of fixture databases by sampling operational databases",
+    "license": "MIT",
+    "type": "project",
+    "bin": ["bin/dbsampler"],
+    "require": {
+        "doctrine/dbal": "^2.5",
+        "fzaninotto/faker": "^1.6",
+        "monolog/monolog": "^1.22",
+        "pimple/pimple": "^3.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.0",
+        "phing/phing": "^2.16",
+        "phpunit/phpunit": "^5.7",
+        "roave/security-advisories": "dev-master",
+        "squizlabs/php_codesniffer": "^2.7"
+    },
+    "authors": [
+        {
+          "name": "Maple Syrup Media",
+          "email": "tech@quidco.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Quidco\\DbSampler\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Quidco\\DbSampler\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

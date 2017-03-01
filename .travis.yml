@@ -1,0 +1,18 @@
+sudo: false
+language: php
+
+php:
+  - 5.6
+  - 7.0
+  - 7.1
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - .phpunit
+
+install:
+  - travis_retry composer install --no-interaction --ignore-platform-reqs
+
+script:
+  - vendor/bin/phing

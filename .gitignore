@@ -1,0 +1,5 @@
+vendor
+composer.lock
+credentials.json
+sqlite-credentials.json
+/tests/fixtures/sqlite-dbs/*.sqlite

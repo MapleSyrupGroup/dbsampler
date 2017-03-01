@@ -1,0 +1,40 @@
+<?php
+/**
+ * Coding standards rules used by php-cs and php-cs-fixer
+ *
+ * Details: http://cs.sensiolabs.org
+ */
+
+
+use Symfony\CS\Config\Config;
+use Symfony\CS\Finder\DefaultFinder;
+
+$finder = DefaultFinder::create()
+    ->exclude('vendor')
+    ->in(__DIR__);
+
+return Config::create()
+    ->fixers([
+        '-psr0',
+        '-concat_without_spaces',
+        '-unalign_double_arrow',
+        '-unalign_equals',
+        '-pre_increment',
+        '-spaces_cast',
+        '-phpdoc_short_description',
+        '-phpdoc_no_empty_return',
+        'braces',
+        'concat_with_spaces',
+        'elseif',
+        'encoding',
+        'indentation',
+        'join_function',
+        'linefeed',
+        'ordered_use',
+        'php_closing_tag',
+        'phpdoc_no_package',
+        'short_array_syntax',
+        'single_quote',
+        'trailing_spaces',
+    ])
+    ->finder($finder);
