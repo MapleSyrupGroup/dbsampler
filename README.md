@@ -1,6 +1,8 @@
 quidco/dbsampler
 ================
 
+[![Build Status](https://travis-ci.org/MapleSyrupGroup/dbsampler.svg?branch=master)](https://travis-ci.org/MapleSyrupGroup/dbsampler)
+
 A general tool for extracting and cleaning selected tables from a database for use as fixtures. 
 Copies a subset of tables from one database to another under the control of a json configuration file. 
 The latter database can then be dumped to SQL for use as a fixture file.
