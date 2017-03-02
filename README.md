@@ -22,13 +22,30 @@ All config files live in the `config` subdirectory. Files *cannot* contain comme
 
 #### credentials.json
 
+`"driver": "pdo_mysql"` is currently assumed but this may change in future.
+
+##### MySQL
+
 See `config/credentials.dist.json`:
 
     {
+      "driver": "pdo_mysql",
       "dbUser": "root",
       "dbPassword": "SOMEPASSWORD",
       "dbHost": "127.0.0.1"
     }
+    
+##### Sqlite
+    
+See `config/credentials.dist.json`:
+    
+    {
+        "driver": "pdo_sqlite",
+        "directory": "..\/path\/to\/sqlite-dbs"
+    }
+    
+Paths are assumed to be relative to the config file unless they start with a '/'. Sqlite databases to be migrated are 
+assumed to be `*.sqlite` files in this directory
 
 #### *dbname*.db.json
     

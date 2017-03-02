@@ -41,6 +41,20 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
         if (!$credentials) {
             throw new \RuntimeException("Credentials file '$filename' could not be read");
         }
+
+        if ($credentials->driver === 'pdo_sqlite') {
+            if (isset($credentials->directory)) {
+                if (strpos($credentials->directory, DIRECTORY_SEPARATOR) !== 0) {
+                    // not an absolute path, treat as relative to sqlite file location
+                    $credentials->directory = realpath(
+                        dirname($filename) . DIRECTORY_SEPARATOR . $credentials->directory
+                    );
+                }
+            } else {
+                throw new \RuntimeException("Sqlite credentials file '$filename' must contain a directory");
+            }
+        }
+
         $this['db.credentials'] = $credentials;
     }
 
