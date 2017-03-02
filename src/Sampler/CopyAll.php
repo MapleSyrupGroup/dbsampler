@@ -13,8 +13,12 @@ class CopyAll extends BaseSampler
 
     public function getRows()
     {
-        $query = $this->sourceConnection->createQueryBuilder()->select('*')->from($this->tableName)->execute();
+        $query = $this->sourceConnection->createQueryBuilder()->select('*')->from($this->tableName);
 
-        return $query->fetchAll();
+        if ($this->limit) {
+            $query->setMaxResults($this->limit);
+        }
+
+        return $query->execute()->fetchAll();
     }
 }

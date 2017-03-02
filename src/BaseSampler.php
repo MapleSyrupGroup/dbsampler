@@ -40,6 +40,13 @@ abstract class BaseSampler implements SamplerInterface
      * @var array
      */
     protected $referenceFields = [];
+    
+    /**
+     * Max number to match (default Db order)
+     *
+     * @var integer
+     */
+    protected $limit;
 
     /**
      * Table name
@@ -147,6 +154,7 @@ abstract class BaseSampler implements SamplerInterface
     public function loadConfig($config)
     {
         $this->referenceFields = isset($config->remember) ? $config->remember : [];
+        $this->limit = isset($config->limit) ? (int)$config->limit : false;
     }
 
     /**
