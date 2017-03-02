@@ -41,4 +41,31 @@ class AppSetupTest extends SqliteBasedTestCase
         $this->assertSame('3', $this->sourceConnection->query('SELECT COUNT(*) FROM baskets')->fetchColumn());
         $this->assertSame('2', $this->destConnection->query('SELECT COUNT(*) FROM baskets')->fetchColumn());
     }
+
+    /**
+     * Check that sqlite credential files handle missing directory field correctly
+     *
+     * @return void
+     * @expectedException \RuntimeException
+     */
+    public function testSqliteCredentialMissingDirectoryHandling()
+    {
+        $app = new App();
+        $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-no-dir.json');
+    }
+
+    /**
+     * Check that sqlite credential files handle relative directory field correctly
+     *
+     * @return void
+     */
+    public function testSqliteCredentialRelativeDirectoryHandling()
+    {
+        $app = new App();
+        $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-relative-dir.json');
+
+        $configuredPath = $app['db.credentials']->directory;
+        $this->assertTrue(is_dir($configuredPath), "Sqlite relative directory path should resolve");
+        $this->assertRegExp('#/tests/#', $configuredPath, 'Sqlite relative directory must resolve to full path');
+    }
 }
