@@ -157,7 +157,7 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
                         'dbname' => $name,
                     ];
 
-                    if(!empty($dbcredentials->dbPort)) {
+                    if (!empty($dbcredentials->dbPort)) {
                         $params['port'] = $dbcredentials->dbPort;
                     }
                     break;
@@ -169,6 +169,12 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
             }
 
             $this["db.connections.$name"] = DriverManager::getConnection($params);
+
+            if (isset($dbcredentials->initialSql)) {
+                foreach($dbcredentials->initialSql as $command) {
+                    $this["db.connections.$name"]->exec($command);
+                }
+            }
         }
 
         return $this["db.connections.$name"];

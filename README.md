@@ -51,7 +51,31 @@ If you need different source and dest servers, this becomes:
         "dbPassword": "SOMEPASSWORD",
         "dbHost": "127.0.0.1"
       }
-    }    
+    }
+        
+If you need to prepare the connections, add an initialSql stanza:
+        
+    {
+      "source": {
+        "driver": "pdo_mysql",
+        "dbUser": "root",
+        "dbPassword": "SOMEPASSWORD",
+        "dbHost": "sourceDB.example.com",
+        "initialSql": [
+          "SET NAMES UTF8"
+        ]
+      },
+      "dest": {
+        "driver": "pdo_mysql",
+        "dbUser": "root",
+        "dbPassword": "SOMEPASSWORD",
+        "dbHost": "127.0.0.1",
+        "initialSql": [
+          "SET NAMES UTF8",
+          "SET foreign_key_checks = 0"
+        ]
+      }
+    }        
     
 ##### Sqlite
     
