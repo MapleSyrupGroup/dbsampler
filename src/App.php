@@ -127,7 +127,9 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
     protected function createConnectionByDbName($name, $direction = self::CONNECTION_SOURCE)
     {
         if (!isset($this["db.connections.$name"])) {
-            $dbcredentials = isset($this["db.credentials"]->$direction) ? $this["db.credentials"]->$direction : $this["db.credentials"];
+            $dbcredentials = isset($this["db.credentials"]->$direction) ?
+                $this["db.credentials"]->$direction :
+                $this["db.credentials"];
 
             switch (isset($dbcredentials->driver) ? $dbcredentials->driver : 'pdo_mysql') {
                 case 'pdo_sqlite':
@@ -171,7 +173,7 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
             $this["db.connections.$name"] = DriverManager::getConnection($params);
 
             if (isset($dbcredentials->initialSql)) {
-                foreach($dbcredentials->initialSql as $command) {
+                foreach ($dbcredentials->initialSql as $command) {
                     $this["db.connections.$name"]->exec($command);
                 }
             }
