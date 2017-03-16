@@ -58,6 +58,12 @@ class FieldCleanerProvider
                     return $faker->safeEmail;
                 };
                 break;
+            case 'fakeuser':
+                /** @noinspection PhpUnusedParameterInspection */
+                $cleaner = function ($existing) use ($faker) {
+                    return $faker->userName;
+                };
+                break;
             case 'zero':
                 /** @noinspection PhpUnusedParameterInspection */
                 $cleaner = function ($existing) {
