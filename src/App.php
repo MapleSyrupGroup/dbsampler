@@ -156,6 +156,10 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
                         'host' => $dbcredentials->dbHost,
                         'dbname' => $name,
                     ];
+
+                    if(!empty($dbcredentials->dbPort)) {
+                        $params['port'] = $dbcredentials->dbPort;
+                    }
                     break;
 
                 default:
