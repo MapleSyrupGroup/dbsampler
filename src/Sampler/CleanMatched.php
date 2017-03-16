@@ -26,6 +26,9 @@ class CleanMatched extends Matched
      */
     public function loadConfig($config)
     {
+        if (!isset($config->cleanFields)) {
+            throw new \RuntimeException("cleanFields missing for {$config->sampler}");
+        }
         $cleanSpec = (array)$config->cleanFields;
         $this->rowCleaner = RowCleaner::createFromSpecification($cleanSpec);
         parent::loadConfig($config);

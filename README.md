@@ -35,6 +35,24 @@ See `config/credentials.dist.json`:
       "dbHost": "127.0.0.1"
     }
     
+If you need different source and dest servers, this becomes:
+    
+    {
+      "source": {
+        "driver": "pdo_mysql",
+        "dbUser": "root",
+        "dbPassword": "SOMEPASSWORD",
+        "dbHost": "sourceDB.example.com"
+      },
+    
+      "dest" : {
+        "driver": "pdo_mysql",
+        "dbUser": "root",
+        "dbPassword": "SOMEPASSWORD",
+        "dbHost": "127.0.0.1"
+      }
+    }    
+    
 ##### Sqlite
     
 See `config/credentials.dist.json`:
