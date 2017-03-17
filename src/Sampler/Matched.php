@@ -69,17 +69,24 @@ class Matched extends BaseSampler
             // Handle remembered reference variables
             if (is_string($value) && strpos($value, '$') === 0) {
                 $variable = substr($value, 1);
-                $value = $this->referenceStore->getReferencesByName($variable);
+                $value = $this->referenceStore->getReferencesByName($variable, null);
+                if(is_null($value)) {
+                    throw new \RuntimeException("'\${$variable}' is not a recognised remembered value");
+                }
             }
 
             if (is_array($value)) {
-                $questionMarks = implode(', ', array_pad([], count($value), '?'));
-                $queryBuilder->andWhere(
-                    $this->sourceConnection->quoteIdentifier($field) . ' IN (' . $questionMarks . ')'
-                );
+                if(count($value)) {
+                    $questionMarks = implode(', ', array_pad([], count($value), '?'));
+                    $queryBuilder->andWhere(
+                        $this->sourceConnection->quoteIdentifier($field) . ' IN (' . $questionMarks . ')'
+                    );
 
-                foreach ((array)$value as $alternate) { // (array) required to prevent static analysis from screaming
-                    $queryBuilder->createPositionalParameter($alternate);
+                    foreach ((array)$value as $alternate) { // (array) required to prevent static analysis from screaming
+                        $queryBuilder->createPositionalParameter($alternate);
+                    }
+                } else {
+                    $queryBuilder->andWhere("0");
                 }
             } else {
                 $queryBuilder->andWhere($this->sourceConnection->quoteIdentifier($field) . ' = ?');
