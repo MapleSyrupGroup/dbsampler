@@ -40,7 +40,7 @@ abstract class BaseSampler implements SamplerInterface
      * @var array
      */
     protected $referenceFields = [];
-    
+
     /**
      * Max number to match (default Db order)
      *
@@ -49,7 +49,7 @@ abstract class BaseSampler implements SamplerInterface
     protected $limit;
 
     /**
-     * Commands to run after table is transferred
+     * Commands to run on the destination table after importing
      *
      * @var array
      */
@@ -162,6 +162,7 @@ abstract class BaseSampler implements SamplerInterface
     {
         $this->referenceFields = isset($config->remember) ? $config->remember : [];
         $this->limit = isset($config->limit) ? (int)$config->limit : false;
+        $this->postImportSql = isset($config->postImportSql) ? $config->postImportSql : [];
     }
 
     /**

@@ -52,6 +52,8 @@ class AppSetupTest extends SqliteBasedTestCase
     {
         $app = new App();
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-no-dir.json');
+        $app->loadDatabaseConfigFile($this->fixturesDir . '/small_sqlite_migration.json');
+        $app->createDestConnectionByDbName('small-sqlite-source'); // directory tested at connection time now
     }
 
     /**
@@ -63,9 +65,26 @@ class AppSetupTest extends SqliteBasedTestCase
     {
         $app = new App();
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-relative-dir.json');
+        $app->loadDatabaseConfigFile($this->fixturesDir . '/small_sqlite_migration.json');
+        $app->createDestConnectionByDbName('small-sqlite-source');
+        // resolution of dirs now happens later
 
         $configuredPath = $app['db.credentials']->directory;
         $this->assertTrue(is_dir($configuredPath), "Sqlite relative directory path should resolve");
         $this->assertRegExp('#/tests/#', $configuredPath, 'Sqlite relative directory must resolve to full path');
+    }
+
+    /**
+     * Check that sqlite credential files handle source, dest DBs correctly
+     *
+     * @return void
+     */
+    public function testSqliteCredentialSourceDestDirectoryHandling()
+    {
+        $app = new App();
+        $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-source-dest.json');
+        $app->loadDatabaseConfigFile($this->fixturesDir . '/small_sqlite_migration.json');
+        $destConn = $app->createDestConnectionByDbName('small-sqlite-source');
+        $this->assertInstanceOf(\Doctrine\DBAL\Connection::class, $destConn);
     }
 }

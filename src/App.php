@@ -42,20 +42,8 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
             throw new \RuntimeException("Credentials file '$filename' could not be read");
         }
 
-        if ($credentials->driver === 'pdo_sqlite') {
-            if (isset($credentials->directory)) {
-                if (strpos($credentials->directory, DIRECTORY_SEPARATOR) !== 0) {
-                    // not an absolute path, treat as relative to sqlite file location
-                    $credentials->directory = realpath(
-                        dirname($filename) . DIRECTORY_SEPARATOR . $credentials->directory
-                    );
-                }
-            } else {
-                throw new \RuntimeException("Sqlite credentials file '$filename' must contain a directory");
-            }
-        }
-
         $this['db.credentials'] = $credentials;
+        $this['db.credentialsFile'] = $filename;
     }
 
     /**
@@ -99,7 +87,7 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
     }
 
     /**
-     * Create a connection class for a given DB name. Other credentials (host, password etc) must already be known
+     * Create source connection for a given DB name. Other credentials (host, password etc) must already be known
      *
      * @param string $name Database name
      *
@@ -107,17 +95,57 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
      * @throws \UnexpectedValueException If configuration is invalid
      * @throws \Doctrine\DBAL\DBALException If connection cannot be made
      */
-    public function createConnectionByDbName($name)
+    public function createSourceConnectionByDbName($name)
+    {
+        return $this->createConnectionByDbName($name, self::CONNECTION_SOURCE);
+    }
+
+    /**
+     * Create dest connection for a given DB name. Other credentials (host, password etc) must already be known
+     *
+     * @param string $name Database name
+     *
+     * @return Connection
+     * @throws \UnexpectedValueException If configuration is invalid
+     * @throws \Doctrine\DBAL\DBALException If connection cannot be made
+     */
+    public function createDestConnectionByDbName($name)
+    {
+        return $this->createConnectionByDbName($name, self::CONNECTION_DEST);
+    }
+
+    /**
+     * Create connection object for DB name / direction. Other credentials (host, password etc) must already be known
+     *
+     * @param string $name      Database name
+     * @param string $direction Determines whether 'source' or 'dest' credentials used, must be one of those values
+     *
+     * @return Connection
+     * @throws \UnexpectedValueException If configuration is invalid
+     * @throws \Doctrine\DBAL\DBALException If connection cannot be made
+     */
+    protected function createConnectionByDbName($name, $direction = self::CONNECTION_SOURCE)
     {
         if (!isset($this["db.connections.$name"])) {
-            switch (isset($this['db.credentials']->driver) ? $this['db.credentials']->driver : 'pdo_mysql') {
+            $dbcredentials = isset($this["db.credentials"]->$direction) ?
+                $this["db.credentials"]->$direction :
+                $this["db.credentials"];
+
+            switch (isset($dbcredentials->driver) ? $dbcredentials->driver : 'pdo_mysql') {
                 case 'pdo_sqlite':
-                    if (empty($this['db.credentials']->directory)) {
+                    if (empty($dbcredentials->directory)) {
                         throw new \UnexpectedValueException('Directory is required in sqlite configuration');
+                    } else {
+                        if (strpos($dbcredentials->directory, DIRECTORY_SEPARATOR) !== 0) {
+                            // not an absolute path, treat as relative to sqlite file location
+                            $dbcredentials->directory = realpath(
+                                dirname($this['db.credentialsFile']) . DIRECTORY_SEPARATOR . $dbcredentials->directory
+                            );
+                        }
                     }
                     $params = [
                         'driver' => 'pdo_sqlite',
-                        'path' => rtrim($this['db.credentials']->directory, DIRECTORY_SEPARATOR)
+                        'path' => rtrim($dbcredentials->directory, DIRECTORY_SEPARATOR)
                             . '/' . $name . '.sqlite',
                     ];
                     break;
@@ -125,20 +153,30 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
                 case 'pdo_mysql':
                     $params = [
                         'driver' => 'pdo_mysql',
-                        'user' => $this['db.credentials']->dbUser,
-                        'password' => $this['db.credentials']->dbPassword,
-                        'host' => $this['db.credentials']->dbHost,
+                        'user' => $dbcredentials->dbUser,
+                        'password' => $dbcredentials->dbPassword,
+                        'host' => $dbcredentials->dbHost,
                         'dbname' => $name,
                     ];
+
+                    if (!empty($dbcredentials->dbPort)) {
+                        $params['port'] = $dbcredentials->dbPort;
+                    }
                     break;
 
                 default:
                     throw new \UnexpectedValueException(
-                        'Driver type "' . $this['db.credentials']->driver . '" not supported yet'
+                        'Driver type "' . $dbcredentials->driver . '" not supported yet'
                     );
             }
 
             $this["db.connections.$name"] = DriverManager::getConnection($params);
+
+            if (isset($dbcredentials->initialSql)) {
+                foreach ($dbcredentials->initialSql as $command) {
+                    $this["db.connections.$name"]->exec($command);
+                }
+            }
         }
 
         return $this["db.connections.$name"];

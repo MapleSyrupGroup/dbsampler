@@ -126,8 +126,8 @@ class Migrator implements LoggerAwareInterface
      */
     public function execute()
     {
-        $sourceConnection = $this->databaseConnectionFactory->createConnectionByDbName($this->sourceDb);
-        $destConnection = $this->databaseConnectionFactory->createConnectionByDbName($this->destinationDb);
+        $sourceConnection = $this->databaseConnectionFactory->createSourceConnectionByDbName($this->sourceDb);
+        $destConnection = $this->databaseConnectionFactory->createDestConnectionByDbName($this->destinationDb);
 
         $setName = $this->migrationSetName;
 
