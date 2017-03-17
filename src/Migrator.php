@@ -140,7 +140,9 @@ class Migrator implements LoggerAwareInterface
                 $rows = $sampler->execute();
                 $this->getLogger()->info("$setName: migrated '$table' with '" . $sampler->getName() . "': $rows rows");
             } catch (\Exception $e) {
-                $this->getLogger()->error("$setName: failed to migrate '$table' with '" . $sampler->getName() . "': ". $e->getMessage());
+                $this->getLogger()->error(
+                    "$setName: failed to migrate '$table' with '" . $sampler->getName() . "': ". $e->getMessage()
+                );
                 throw $e;
             }
         }
