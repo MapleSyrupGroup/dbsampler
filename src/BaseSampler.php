@@ -49,6 +49,13 @@ abstract class BaseSampler implements SamplerInterface
     protected $limit;
 
     /**
+     * Commands to run after table is transferred
+     *
+     * @var array
+     */
+    protected $postImportSql = [];
+
+    /**
      * Table name
      *
      * @return string
@@ -160,19 +167,23 @@ abstract class BaseSampler implements SamplerInterface
     /**
      * Naïve implementation - grab all rows and insert
      *
-     * @return void
+     * @return int Rows copied
      * @throws \RuntimeException If dest connection not configured
      */
     public function execute()
     {
         $rows = $this->getRows();
         $references = [];
+
+        foreach ($this->referenceFields as $key => $variable) {
+            if (!array_key_exists($variable, $references)) {
+                $references[$variable] = [];
+            }
+        }
+
         foreach ($rows as $row) {
             // Store any reference fields we've been told to remember
             foreach ($this->referenceFields as $key => $variable) {
-                if (!array_key_exists($variable, $references)) {
-                    $references[$variable] = [];
-                }
                 $references[$variable][] = $row[$key];
             }
 
@@ -183,6 +194,12 @@ abstract class BaseSampler implements SamplerInterface
         foreach ($references as $reference => $values) {
             $this->referenceStore->setReferencesByName($reference, $values);
         }
+
+        foreach ($this->postImportSql as $sql) {
+            $this->demandDestConnection()->exec($sql);
+        }
+
+        return count($rows);
     }
 
     /**

@@ -70,19 +70,19 @@ class Matched extends BaseSampler
             if (is_string($value) && strpos($value, '$') === 0) {
                 $variable = substr($value, 1);
                 $value = $this->referenceStore->getReferencesByName($variable, null);
-                if(is_null($value)) {
+                if (is_null($value)) {
                     throw new \RuntimeException("'\${$variable}' is not a recognised remembered value");
                 }
             }
 
             if (is_array($value)) {
-                if(count($value)) {
+                if (count($value)) {
                     $questionMarks = implode(', ', array_pad([], count($value), '?'));
                     $queryBuilder->andWhere(
                         $this->sourceConnection->quoteIdentifier($field) . ' IN (' . $questionMarks . ')'
                     );
 
-                    foreach ((array)$value as $alternate) { // (array) required to prevent static analysis from screaming
+                    foreach ((array)$value as $alternate) { // (array) required to keep static analysis from screaming
                         $queryBuilder->createPositionalParameter($alternate);
                     }
                 } else {
