@@ -86,7 +86,7 @@ class Matched extends BaseSampler
                         $queryBuilder->createPositionalParameter($alternate);
                     }
                 } else {
-                    $queryBuilder->andWhere("0");
+                    $queryBuilder->andWhere('0');
                 }
             } else {
                 $queryBuilder->andWhere($this->sourceConnection->quoteIdentifier($field) . ' = ?');
