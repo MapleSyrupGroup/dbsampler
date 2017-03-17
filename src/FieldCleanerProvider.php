@@ -64,6 +64,17 @@ class FieldCleanerProvider
                     return $faker->userName;
                 };
                 break;
+            case 'faker':
+                /** @noinspection PhpUnusedParameterInspection */
+                $cleaner = function ($existing) use ($faker, $parameters) {
+                    $fakerField = $parameters[0];
+                    if($faker->getFormatter($fakerField)) {
+                        return $faker->$fakerField;
+                    } else {
+                        throw new \RuntimeException("Faker does not support '$fakerField'");
+                    }
+                };
+                break;
             case 'zero':
                 /** @noinspection PhpUnusedParameterInspection */
                 $cleaner = function ($existing) {
@@ -93,6 +104,12 @@ class FieldCleanerProvider
                     }
 
                     return date('Y-m-d H:i:s', $epoch);
+                };
+                break;
+            case 'randomdigits':
+                $cleaner = function ($existing) use ($parameters) {
+                    $digits = empty($parameters[0]) ? 5 : $parameters[0];
+                    return sprintf("%0{$digits}d", rand(0, pow(10, $digits + 1)));
                 };
                 break;
         }

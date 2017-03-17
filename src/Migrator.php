@@ -132,12 +132,17 @@ class Migrator implements LoggerAwareInterface
         $setName = $this->migrationSetName;
 
         foreach ($this->tableMigrations as $table => $sampler) {
-            $this->ensureEmptyTargetTable($table, $sourceConnection, $destConnection);
-            $sampler->setTableName($table);
-            $sampler->setSourceConnection($sourceConnection);
-            $sampler->setDestConnection($destConnection);
-            $rows = $sampler->execute();
-            $this->getLogger()->info("$setName: migrated '$table' with '" . $sampler->getName() . "': $rows rows");
+            try {
+                $this->ensureEmptyTargetTable($table, $sourceConnection, $destConnection);
+                $sampler->setTableName($table);
+                $sampler->setSourceConnection($sourceConnection);
+                $sampler->setDestConnection($destConnection);
+                $rows = $sampler->execute();
+                $this->getLogger()->info("$setName: migrated '$table' with '" . $sampler->getName() . "': $rows rows");
+            } catch (\Exception $e) {
+                $this->getLogger()->error("$setName: failed to migrate '$table' with '" . $sampler->getName() . "': ". $e->getMessage());
+                throw $e;
+            }
         }
     }
 
