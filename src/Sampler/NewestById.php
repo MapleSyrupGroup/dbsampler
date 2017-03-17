@@ -37,7 +37,8 @@ class NewestById extends BaseSampler
      */
     public function loadConfig($config)
     {
-        $this->quantity = (int)$this->demandParameterValue($config, 'quantity');
+        parent::loadConfig($config);
+        $this->quantity = (int)$this->demandParameterValue($config, 'quantity'); // TODO possibly rename to 'limit'
         $this->idField = $this->demandParameterValue($config, 'idField');
     }
 

@@ -144,6 +144,16 @@ assumed to be `*.sqlite` files in this directory
         }
       }
     }
+    
+##### "Faker" cleaners
+    
+Any 'faker' ([fzaninotto/faker](https://github.com/fzaninotto/Faker)) generator that does not require parameters can be 
+used directly in the cleanFields stanza by using `"name": "faker:GENERATOR"`, eg:
+   
+     "cleanFields": {
+       "ip": "faker:ipv4"
+     },
+   
 
 Extending the project
 ---------------------

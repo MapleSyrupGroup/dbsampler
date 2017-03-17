@@ -27,8 +27,8 @@ class ReferenceStore
      *
      * @return array
      */
-    public function getReferencesByName($name)
+    public function getReferencesByName($name, $default = [])
     {
-        return array_key_exists($name, $this->references) ? $this->references[$name] : [];
+        return array_key_exists($name, $this->references) ? $this->references[$name] : $default;
     }
 }

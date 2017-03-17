@@ -44,7 +44,7 @@ interface SamplerInterface
     /**
      * Copy sampled data from source to destination DB according to internal logic
      *
-     * @return void
+     * @return int Rows copied
      * @inheritdoc
      */
     public function execute();
