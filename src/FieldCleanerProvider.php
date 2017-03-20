@@ -81,6 +81,12 @@ class FieldCleanerProvider
                     return 0;
                 };
                 break;
+            case 'null':
+                /** @noinspection PhpUnusedParameterInspection */
+                $cleaner = function ($existing) {
+                    return null;
+                };
+                break;
             case 'ipsum':
                 /** @noinspection PhpUnusedParameterInspection */
                 $cleaner = function ($existing) use ($faker) {
