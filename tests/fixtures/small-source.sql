@@ -43,3 +43,10 @@ INSERT INTO `fruit_x_basket` VALUES (4, 2, 2, 3);
 
 INSERT INTO `fruit_x_basket` VALUES (2, 1, 3, 4);
 INSERT INTO `fruit_x_basket` VALUES (4, 4, 3, 4);
+
+
+DROP VIEW IF EXISTS `basket_contents`;
+CREATE VIEW `basket_contents` AS
+SELECT * FROM fruits
+JOIN fruit_x_basket ON fruit_x_basket.fruit_id = fruits.id
+JOIN baskets ON fruit_x_basket.basket_id = basket_id

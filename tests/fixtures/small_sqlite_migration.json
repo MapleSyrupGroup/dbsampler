@@ -38,5 +38,8 @@
         "name": "fakefullname"
       }
     }
-  }
+  },
+  "views": [
+    "basket_contents"
+  ]
 }

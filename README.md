@@ -143,9 +143,9 @@ assumed to be `*.sqlite` files in this directory
           }
         }
       },
-      "views": [                            # view support is experimental and only supports MySQL so far
+      "views": [                            # view support is experimental
         "some_view"                         # views are specified as name only but format may change
-      ]                                     # The destination's CURRENT_USER() is used as the DEFINER
+      ]                                     # The destination's CURRENT_USER() is used as the DEFINER for MySQL DBs
     }
     
 ##### "Faker" cleaners

@@ -254,9 +254,13 @@ class Migrator implements LoggerAwareInterface
     /**
      * Migrate a view from source to dest DB
      *
-     * @param string     $view
-     * @param Connection $sourceConnection
-     * @param Connection $destConnection
+     * @param string     $view             Name of view to migrate
+     * @param Connection $sourceConnection Source connection
+     * @param Connection $destConnection   Destination connection
+     * @return void
+     *
+     * @throws \Doctrine\DBAL\DBALException If view cannot be read
+     * @throws \RuntimeException For DB types where this is unsupported
      */
     protected function migrateView($view, Connection $sourceConnection, Connection $destConnection)
     {
@@ -267,24 +271,27 @@ class Migrator implements LoggerAwareInterface
             $createSqlRow = $sourceConnection->query('SHOW CREATE VIEW ' . $sourceConnection->quoteIdentifier($view))
                 ->fetch(\PDO::FETCH_ASSOC);
             $createSql = $createSqlRow['Create View'];
+
+            $currentDestUser = $destConnection->fetchColumn('SELECT CURRENT_USER()');
+
+            if ($currentDestUser) {
+                //Because MySQL. SELECT CURRENT_USER() returns an unescaped user
+                $currentDestUser = implode('@', array_map(function ($p) use ($destConnection) {
+                    return $destConnection->getDatabasePlatform()->quoteSingleIdentifier($p);
+                }, explode('@', $currentDestUser)));
+
+                $createSql = preg_replace('/\bDEFINER=`[^`]+`@`[^`]+`(?=\s)/', "DEFINER=$currentDestUser", $createSql);
+            }
+        } elseif ($driverName === 'pdo_sqlite') {
+            /** @noinspection SqlDialectInspection */
+            $schemaSql = 'SELECT SQL FROM sqlite_master WHERE NAME=' . $sourceConnection->quoteIdentifier($view);
+            $createSql = $sourceConnection->query($schemaSql)->fetchColumn();
         } else {
             throw new \RuntimeException(__METHOD__ . " not implemented for $driverName yet");
         }
-
-        $currentDestUser = $destConnection->fetchColumn('SELECT CURRENT_USER()');
-
-        if ($currentDestUser) {
-            //Because MySQL. SELECT CURRENT_USER() returns an unescaped user
-            $currentDestUser = join('@', array_map(function ($p) use ($destConnection) {
-                return $destConnection->getDatabasePlatform()->quoteSingleIdentifier($p);
-            }, explode('@', $currentDestUser)));
-
-            $createSql = preg_replace('/\bDEFINER=`[^`]+`@`[^`]+`(?=\s)/', "DEFINER=$currentDestUser", $createSql);
-        }
-
         $destConnection->exec($createSql);
 
         $setName = $this->migrationSetName;
-        $this->logger->info("$setName: migrated view '$view' as '$currentDestUser'");
+        $this->logger->info("$setName: migrated view '$view'");
     }
 }
