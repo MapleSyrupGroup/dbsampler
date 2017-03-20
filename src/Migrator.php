@@ -75,7 +75,9 @@ class Migrator implements LoggerAwareInterface
     }
 
     /**
-     * @param string $sourceDb
+     * Set source DB name
+     *
+     * @param string $sourceDb Source DB name
      *
      * @return Migrator
      */
@@ -95,7 +97,9 @@ class Migrator implements LoggerAwareInterface
     }
 
     /**
-     * @param string $destinationDb
+     * Set destination DB name
+     *
+     * @param string $destinationDb Destination DB name
      *
      * @return Migrator
      */
@@ -115,7 +119,9 @@ class Migrator implements LoggerAwareInterface
     }
 
     /**
-     * @param DatabaseConnectionFactoryInterface $databaseConnectionFactory
+     * Set Database Connection Factory
+     *
+     * @param DatabaseConnectionFactoryInterface $databaseConnectionFactory Database Connection Factory
      *
      * @return Migrator
      */
@@ -128,6 +134,10 @@ class Migrator implements LoggerAwareInterface
 
     /**
      * Perform the configured migrations
+     *
+     * @return void
+     *
+     * @throws \Exception Rethrows any exceptions after loggin
      */
     public function execute()
     {
@@ -159,6 +169,8 @@ class Migrator implements LoggerAwareInterface
 
     /**
      * Reset the list of table samplers to be empty
+     *
+     * @return void
      */
     public function clearTableMigrations()
     {
@@ -167,6 +179,8 @@ class Migrator implements LoggerAwareInterface
 
     /**
      * Reset the list of view migrations to be empty
+     *
+     * @return void
      */
     public function clearViewMigrations()
     {
@@ -190,7 +204,9 @@ class Migrator implements LoggerAwareInterface
     /**
      * Add view to be migrated, by name
      *
-     * @param $view
+     * @param string $view Name of view to add
+     *
+     * @return void
      */
     public function addViewToMigrate($view)
     {
@@ -205,6 +221,7 @@ class Migrator implements LoggerAwareInterface
      * @param Connection $destConnection   Target DB connection
      *
      * @return void
+     * @throws \RuntimeException If DB type not supported
      * @throws \Doctrine\DBAL\DBALException If target table cannot be removed or recreated
      */
     private function ensureEmptyTargetTable($table, Connection $sourceConnection, Connection $destConnection)
@@ -218,7 +235,6 @@ class Migrator implements LoggerAwareInterface
                 ->fetch(\PDO::FETCH_ASSOC);
             $createSql = $createSqlRow['Create Table'];
         } elseif ($driverName === 'pdo_sqlite') {
-            /** @noinspection SqlDialectInspection */
             $schemaSql = 'SELECT SQL FROM sqlite_master WHERE NAME=' . $sourceConnection->quoteIdentifier($table);
             $createSql = $sourceConnection->query($schemaSql)->fetchColumn();
         } else {
@@ -257,6 +273,7 @@ class Migrator implements LoggerAwareInterface
      * @param string     $view             Name of view to migrate
      * @param Connection $sourceConnection Source connection
      * @param Connection $destConnection   Destination connection
+     *
      * @return void
      *
      * @throws \Doctrine\DBAL\DBALException If view cannot be read
@@ -283,7 +300,6 @@ class Migrator implements LoggerAwareInterface
                 $createSql = preg_replace('/\bDEFINER=`[^`]+`@`[^`]+`(?=\s)/', "DEFINER=$currentDestUser", $createSql);
             }
         } elseif ($driverName === 'pdo_sqlite') {
-            /** @noinspection SqlDialectInspection */
             $schemaSql = 'SELECT SQL FROM sqlite_master WHERE NAME=' . $sourceConnection->quoteIdentifier($view);
             $createSql = $sourceConnection->query($schemaSql)->fetchColumn();
         } else {
