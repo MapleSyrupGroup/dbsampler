@@ -66,6 +66,13 @@ class MigrationConfigProcessor
         foreach ($tables as $table => $migrationSpec) {
             $migrator->addTableSampler($table, $this->buildTableSampler($migrationSpec));
         }
+
+        if (isset($configuration->views)) {
+            $views = (array)$configuration->views;
+            foreach ($views as $view) {
+                $migrator->addViewToMigrate($view);
+            }
+        }
     }
 
     /**

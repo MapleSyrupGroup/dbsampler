@@ -37,7 +37,12 @@ class Migrator implements LoggerAwareInterface
      *
      * @var SamplerInterface[]
      */
-    protected $tableMigrations;
+    protected $tableMigrations = [];
+
+    /**
+     * @var string[]
+     */
+    protected $viewsToMigrate = [];
 
     /**
      * Object that can create a Doctrine\DBAL\Connection from DB name
@@ -70,7 +75,9 @@ class Migrator implements LoggerAwareInterface
     }
 
     /**
-     * @param string $sourceDb
+     * Set source DB name
+     *
+     * @param string $sourceDb Source DB name
      *
      * @return Migrator
      */
@@ -90,7 +97,9 @@ class Migrator implements LoggerAwareInterface
     }
 
     /**
-     * @param string $destinationDb
+     * Set destination DB name
+     *
+     * @param string $destinationDb Destination DB name
      *
      * @return Migrator
      */
@@ -110,7 +119,9 @@ class Migrator implements LoggerAwareInterface
     }
 
     /**
-     * @param DatabaseConnectionFactoryInterface $databaseConnectionFactory
+     * Set Database Connection Factory
+     *
+     * @param DatabaseConnectionFactoryInterface $databaseConnectionFactory Database Connection Factory
      *
      * @return Migrator
      */
@@ -123,6 +134,10 @@ class Migrator implements LoggerAwareInterface
 
     /**
      * Perform the configured migrations
+     *
+     * @return void
+     *
+     * @throws \Exception Rethrows any exceptions after loggin
      */
     public function execute()
     {
@@ -141,19 +156,35 @@ class Migrator implements LoggerAwareInterface
                 $this->getLogger()->info("$setName: migrated '$table' with '" . $sampler->getName() . "': $rows rows");
             } catch (\Exception $e) {
                 $this->getLogger()->error(
-                    "$setName: failed to migrate '$table' with '" . $sampler->getName() . "': ". $e->getMessage()
+                    "$setName: failed to migrate '$table' with '" . $sampler->getName() . "': " . $e->getMessage()
                 );
                 throw $e;
             }
+        }
+
+        foreach ($this->viewsToMigrate as $view) {
+            $this->migrateView($view, $sourceConnection, $destConnection);
         }
     }
 
     /**
      * Reset the list of table samplers to be empty
+     *
+     * @return void
      */
     public function clearTableMigrations()
     {
         $this->tableMigrations = [];
+    }
+
+    /**
+     * Reset the list of view migrations to be empty
+     *
+     * @return void
+     */
+    public function clearViewMigrations()
+    {
+        $this->viewsToMigrate = [];
     }
 
     /**
@@ -171,6 +202,18 @@ class Migrator implements LoggerAwareInterface
     }
 
     /**
+     * Add view to be migrated, by name
+     *
+     * @param string $view Name of view to add
+     *
+     * @return void
+     */
+    public function addViewToMigrate($view)
+    {
+        $this->viewsToMigrate[] = $view;
+    }
+
+    /**
      * Ensure that the specified table is present in the destination DB as an empty copy of the source
      *
      * @param string     $table            Table name
@@ -178,6 +221,7 @@ class Migrator implements LoggerAwareInterface
      * @param Connection $destConnection   Target DB connection
      *
      * @return void
+     * @throws \RuntimeException If DB type not supported
      * @throws \Doctrine\DBAL\DBALException If target table cannot be removed or recreated
      */
     private function ensureEmptyTargetTable($table, Connection $sourceConnection, Connection $destConnection)
@@ -191,8 +235,7 @@ class Migrator implements LoggerAwareInterface
                 ->fetch(\PDO::FETCH_ASSOC);
             $createSql = $createSqlRow['Create Table'];
         } elseif ($driverName === 'pdo_sqlite') {
-            /** @noinspection SqlDialectInspection */
-            $schemaSql = 'SELECT sql FROM sqlite_master WHERE name=' . $sourceConnection->quoteIdentifier($table);
+            $schemaSql = 'SELECT SQL FROM sqlite_master WHERE NAME=' . $sourceConnection->quoteIdentifier($table);
             $createSql = $sourceConnection->query($schemaSql)->fetchColumn();
         } else {
             throw new \RuntimeException(__METHOD__ . " not implemented for $driverName yet");
@@ -222,5 +265,49 @@ class Migrator implements LoggerAwareInterface
     protected function getLogger()
     {
         return $this->logger ?: new NullLogger();
+    }
+
+    /**
+     * Migrate a view from source to dest DB
+     *
+     * @param string     $view             Name of view to migrate
+     * @param Connection $sourceConnection Source connection
+     * @param Connection $destConnection   Destination connection
+     *
+     * @return void
+     *
+     * @throws \Doctrine\DBAL\DBALException If view cannot be read
+     * @throws \RuntimeException For DB types where this is unsupported
+     */
+    protected function migrateView($view, Connection $sourceConnection, Connection $destConnection)
+    {
+        $destConnection->exec('DROP VIEW IF EXISTS ' . $sourceConnection->quoteIdentifier($view));
+
+        $driverName = $sourceConnection->getDriver()->getName();
+        if ($driverName === 'pdo_mysql') {
+            $createSqlRow = $sourceConnection->query('SHOW CREATE VIEW ' . $sourceConnection->quoteIdentifier($view))
+                ->fetch(\PDO::FETCH_ASSOC);
+            $createSql = $createSqlRow['Create View'];
+
+            $currentDestUser = $destConnection->fetchColumn('SELECT CURRENT_USER()');
+
+            if ($currentDestUser) {
+                //Because MySQL. SELECT CURRENT_USER() returns an unescaped user
+                $currentDestUser = implode('@', array_map(function ($p) use ($destConnection) {
+                    return $destConnection->getDatabasePlatform()->quoteSingleIdentifier($p);
+                }, explode('@', $currentDestUser)));
+
+                $createSql = preg_replace('/\bDEFINER=`[^`]+`@`[^`]+`(?=\s)/', "DEFINER=$currentDestUser", $createSql);
+            }
+        } elseif ($driverName === 'pdo_sqlite') {
+            $schemaSql = 'SELECT SQL FROM sqlite_master WHERE NAME=' . $sourceConnection->quoteIdentifier($view);
+            $createSql = $sourceConnection->query($schemaSql)->fetchColumn();
+        } else {
+            throw new \RuntimeException(__METHOD__ . " not implemented for $driverName yet");
+        }
+        $destConnection->exec($createSql);
+
+        $setName = $this->migrationSetName;
+        $this->logger->info("$setName: migrated view '$view'");
     }
 }

@@ -11,7 +11,7 @@ Usage
 -----
 
 - Create the target database(s) you wish to fill. The tool will only output to existing databases. The content of the Destination Databases **will** be trashed.
-- Create `config/credentials.json` with the DB server configuration. Note that all input and output databases are currently assumed to be on the same server and accessible with the same credentials.
+- Create `config/credentials.json` with the DB server configuration. 
 - Create `config/*.db.json` files to define mappings for each required database
 - Run `bin/dbsampler.php`
 
@@ -142,7 +142,10 @@ assumed to be `*.sqlite` files in this directory
             "name": "fakefullname"
           }
         }
-      }
+      },
+      "views": [                            # view support is experimental
+        "some_view"                         # views are specified as name only but format may change
+      ]                                     # The destination's CURRENT_USER() is used as the DEFINER for MySQL DBs
     }
     
 ##### "Faker" cleaners
