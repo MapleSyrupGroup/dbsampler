@@ -37,7 +37,12 @@ class Migrator implements LoggerAwareInterface
      *
      * @var SamplerInterface[]
      */
-    protected $tableMigrations;
+    protected $tableMigrations = [];
+
+    /**
+     * @var string[]
+     */
+    protected $viewsToMigrate = [];
 
     /**
      * Object that can create a Doctrine\DBAL\Connection from DB name
@@ -141,10 +146,14 @@ class Migrator implements LoggerAwareInterface
                 $this->getLogger()->info("$setName: migrated '$table' with '" . $sampler->getName() . "': $rows rows");
             } catch (\Exception $e) {
                 $this->getLogger()->error(
-                    "$setName: failed to migrate '$table' with '" . $sampler->getName() . "': ". $e->getMessage()
+                    "$setName: failed to migrate '$table' with '" . $sampler->getName() . "': " . $e->getMessage()
                 );
                 throw $e;
             }
+        }
+
+        foreach ($this->viewsToMigrate as $view) {
+            $this->migrateView($view, $sourceConnection, $destConnection);
         }
     }
 
@@ -154,6 +163,14 @@ class Migrator implements LoggerAwareInterface
     public function clearTableMigrations()
     {
         $this->tableMigrations = [];
+    }
+
+    /**
+     * Reset the list of view migrations to be empty
+     */
+    public function clearViewMigrations()
+    {
+        $this->viewsToMigrate = [];
     }
 
     /**
@@ -168,6 +185,16 @@ class Migrator implements LoggerAwareInterface
     {
         //TODO these might need to be in order
         $this->tableMigrations[$table] = $sampler;
+    }
+
+    /**
+     * Add view to be migrated, by name
+     *
+     * @param $view
+     */
+    public function addViewToMigrate($view)
+    {
+        $this->viewsToMigrate[] = $view;
     }
 
     /**
@@ -192,7 +219,7 @@ class Migrator implements LoggerAwareInterface
             $createSql = $createSqlRow['Create Table'];
         } elseif ($driverName === 'pdo_sqlite') {
             /** @noinspection SqlDialectInspection */
-            $schemaSql = 'SELECT sql FROM sqlite_master WHERE name=' . $sourceConnection->quoteIdentifier($table);
+            $schemaSql = 'SELECT SQL FROM sqlite_master WHERE NAME=' . $sourceConnection->quoteIdentifier($table);
             $createSql = $sourceConnection->query($schemaSql)->fetchColumn();
         } else {
             throw new \RuntimeException(__METHOD__ . " not implemented for $driverName yet");
@@ -222,5 +249,42 @@ class Migrator implements LoggerAwareInterface
     protected function getLogger()
     {
         return $this->logger ?: new NullLogger();
+    }
+
+    /**
+     * Migrate a view from source to dest DB
+     *
+     * @param string     $view
+     * @param Connection $sourceConnection
+     * @param Connection $destConnection
+     */
+    protected function migrateView($view, Connection $sourceConnection, Connection $destConnection)
+    {
+        $destConnection->exec('DROP VIEW IF EXISTS ' . $sourceConnection->quoteIdentifier($view));
+
+        $driverName = $sourceConnection->getDriver()->getName();
+        if ($driverName === 'pdo_mysql') {
+            $createSqlRow = $sourceConnection->query('SHOW CREATE VIEW ' . $sourceConnection->quoteIdentifier($view))
+                ->fetch(\PDO::FETCH_ASSOC);
+            $createSql = $createSqlRow['Create View'];
+        } else {
+            throw new \RuntimeException(__METHOD__ . " not implemented for $driverName yet");
+        }
+
+        $currentDestUser = $destConnection->fetchColumn('SELECT CURRENT_USER()');
+
+        if ($currentDestUser) {
+            //Because MySQL. SELECT CURRENT_USER() returns an unescaped user
+            $currentDestUser = join('@', array_map(function ($p) use ($destConnection) {
+                return $destConnection->getDatabasePlatform()->quoteSingleIdentifier($p);
+            }, explode('@', $currentDestUser)));
+
+            $createSql = preg_replace('/\bDEFINER=`[^`]+`@`[^`]+`(?=\s)/', "DEFINER=$currentDestUser", $createSql);
+        }
+
+        $destConnection->exec($createSql);
+
+        $setName = $this->migrationSetName;
+        $this->logger->info("$setName: migrated view '$view' as '$currentDestUser'");
     }
 }
