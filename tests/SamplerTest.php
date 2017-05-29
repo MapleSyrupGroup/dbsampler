@@ -19,7 +19,7 @@ class SamplerTest extends SqliteBasedTestCase
         $sampler = new CopyAll();
         $sampler->setTableName('fruits');
         $sampler->setSourceConnection($this->sourceConnection);
-        $this->assertSame(4, count($sampler->getRows()));
+        $this->assertCount(4, $sampler->getRows());
     }
 
     public function testCopyAllWithReferenceStore()
@@ -33,6 +33,6 @@ class SamplerTest extends SqliteBasedTestCase
         $sampler->loadConfig((object)['remember' => ['id' => 'fruit_ids']]);
         $sampler->execute();
 
-        $this->assertEquals(4, count($referenceStore->getReferencesByName('fruit_ids')));
+        $this->assertCount(4, $referenceStore->getReferencesByName('fruit_ids'));
     }
 }
