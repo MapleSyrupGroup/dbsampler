@@ -119,7 +119,9 @@ class FieldCleanerProvider
                     return implode(
                         '',
                         array_map(
-                            function() { return mt_rand(0, 9); },
+                            function () {
+                                return mt_rand(0, 9);
+                            },
                             range(1, $digits)
                         )
                     );
