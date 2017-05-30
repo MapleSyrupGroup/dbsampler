@@ -113,10 +113,18 @@ class FieldCleanerProvider
                 };
                 break;
             case 'randomdigits':
+                /** @noinspection PhpUnusedParameterInspection */
                 $cleaner = function ($existing) use ($parameters) {
                     $digits = empty($parameters[0]) ? 5 : $parameters[0];
-
-                    return sprintf("%0{$digits}d", rand(0, pow(10, $digits + 1)));
+                    return implode(
+                        '',
+                        array_map(
+                            function () {
+                                return mt_rand(0, 9);
+                            },
+                            range(1, $digits)
+                        )
+                    );
                 };
                 break;
         }
