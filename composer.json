@@ -35,5 +35,21 @@
     },
     "config": {
         "sort-packages": true
+    },
+    "scripts": {
+        "phpcs": "./vendor/bin/phpcs src/ --standard=PSR2 --warning-severity=8",
+        "phpcbf": "./vendor/bin/phpcbf src/ --standard=PSR2 --warning-severity=8",
+        "php-cs-fixer-lint": "./vendor/bin/php-cs-fixer --verbose --dry-run fix --rules=@PSR2,no_unused_imports src/",
+        "php-cs-fixer-fix": "./vendor/bin/php-cs-fixer --verbose fix --rules=@PSR2,no_unused_imports src/",
+        "phpunit": "./vendor/bin/phpunit --coverage-clover=phpcov.xml",
+        "lint": [
+            "@phpcs",
+            "@php-cs-fixer-lint"
+        ],
+        "test": "phpunit --colors=always --coverage-clover=phpcov.xml",
+        "fix": [
+            "@phpcbf",
+            "@php-cs-fixer-fix"
+        ]
     }
 }

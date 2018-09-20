@@ -8,7 +8,6 @@ use Quidco\DbSampler\BaseSampler;
  */
 class CopyEmpty extends BaseSampler
 {
-
     public function getName()
     {
         return 'CopyEmpty';
@@ -16,7 +15,7 @@ class CopyEmpty extends BaseSampler
 
     public function loadConfig($config)
     {
-       // none needed
+        // none needed
     }
 
     public function getRows()
