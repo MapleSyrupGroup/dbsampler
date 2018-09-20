@@ -28,6 +28,10 @@ class Matched extends BaseSampler
      * @var array
      */
     protected $constraints;
+    /**
+     * @var array
+     */
+    private $where;
 
     /**
      * Return a unique name for this sampler for informational purposes
@@ -52,6 +56,7 @@ class Matched extends BaseSampler
     {
         parent::loadConfig($config);
         $this->constraints = (array)$this->demandParameterValue($config, 'constraints');
+        $this->where = $config->where ?? [];
     }
 
     /**
@@ -92,6 +97,10 @@ class Matched extends BaseSampler
                 $queryBuilder->andWhere($this->sourceConnection->quoteIdentifier($field) . ' = ?');
                 $queryBuilder->createPositionalParameter($value);
             }
+        }
+
+        foreach ($this->where as $where) {
+            $queryBuilder->andWhere($where);
         }
 
         if ($this->limit) {
