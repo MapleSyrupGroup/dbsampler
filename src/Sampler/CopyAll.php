@@ -5,7 +5,6 @@ use Quidco\DbSampler\BaseSampler;
 
 class CopyAll extends BaseSampler
 {
-
     public function getName()
     {
         return 'CopyAll';
