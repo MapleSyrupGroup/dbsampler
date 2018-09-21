@@ -12,7 +12,6 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.0",
-        "phing/phing": "^2.16",
         "phpunit/phpunit": "^5.7",
         "roave/security-advisories": "dev-master",
         "squizlabs/php_codesniffer": "^2.7"
@@ -41,12 +40,12 @@
         "phpcbf": "./vendor/bin/phpcbf src/ --standard=PSR2 --warning-severity=8",
         "php-cs-fixer-lint": "./vendor/bin/php-cs-fixer --verbose --dry-run fix --rules=@PSR2,no_unused_imports src/",
         "php-cs-fixer-fix": "./vendor/bin/php-cs-fixer --verbose fix --rules=@PSR2,no_unused_imports src/",
-        "phpunit": "./vendor/bin/phpunit --coverage-clover=phpcov.xml",
+        "phpunit": "./vendor/bin/phpunit --coverage-clover=phpcov.xml --coverage-text",
         "lint": [
             "@phpcs",
             "@php-cs-fixer-lint"
         ],
-        "test": "phpunit --colors=always --coverage-clover=phpcov.xml",
+        "test": "@phpunit",
         "fix": [
             "@phpcbf",
             "@php-cs-fixer-fix"

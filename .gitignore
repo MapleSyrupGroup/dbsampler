@@ -3,3 +3,6 @@ composer.lock
 credentials.json
 sqlite-credentials.json
 /tests/fixtures/sqlite-dbs/*.sqlite
+.idea
+phpcov.xml
+.php_cs.cache
