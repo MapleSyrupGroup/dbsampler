@@ -127,6 +127,9 @@ assumed to be `*.sqlite` files in this directory
             "fruit_id": "$fruit_ids"        # Remembered variables, with $ sign, can be used as cross-references
                                             # This will expand to all ids of the fruits table matched above
           },
+          "where" : [
+            "basket_id > 1"                 # The matched sampler can also accept a list of arbitrary WHERE clauses
+          ],
           "remember": {
             "basket_id": "basket_ids"
           }

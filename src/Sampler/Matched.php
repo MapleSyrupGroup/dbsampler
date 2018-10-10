@@ -7,21 +7,24 @@ use Quidco\DbSampler\BaseSampler;
  * Sample DB rows that match specific values
  *
  * Can create IN constraints by setting an array as the RHS of the constraint, otherwise set a scalar
+ * Can specify a list of WHERE clauses
  *
  * eg:
  * "api_clients": {
- * "sampler": "matched",
- * "constraints": {
- * "cobrand_prefix": [
- * "candis",
- * "www"
- * ]
+ *     "sampler": "matched",
+ *     "constraints": {
+ *         "cobrand_prefix": [
+ *             "candis",
+ *             "www"
+ *         ]
+ *     },
+ *     "where": [
+ *         "created > NOW()"
+ *     ]
  * }
- * },
  */
 class Matched extends BaseSampler
 {
-
     /**
      * Assoc array of field => static value
      *
@@ -55,8 +58,12 @@ class Matched extends BaseSampler
     public function loadConfig($config)
     {
         parent::loadConfig($config);
-        $this->constraints = (array)$this->demandParameterValue($config, 'constraints');
         $this->where = $config->where ?? [];
+        if ($this->where) {
+            $this->constraints = $config->constraints ?? [];
+        } else {
+            $this->constraints = (array)$this->demandParameterValue($config, 'constraints');
+        }
     }
 
     /**
