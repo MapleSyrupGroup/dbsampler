@@ -256,6 +256,7 @@ abstract class BaseSampler implements SamplerInterface
                 'group',
                 'key',
                 'order',
+                'value',
             ];
 
         /** @noinspection ForeachOnArrayComponentsInspection */
