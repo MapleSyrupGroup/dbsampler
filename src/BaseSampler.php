@@ -251,19 +251,10 @@ abstract class BaseSampler implements SamplerInterface
      */
     private function sanitiseRowKeys(&$row)
     {
-        $reservedFields =
-            [
-                'group',
-                'key',
-                'order',
-            ];
-
         /** @noinspection ForeachOnArrayComponentsInspection */
         foreach (array_keys($row) as $key) {
-            if (in_array($key, $reservedFields)) {
-                $row[$this->demandDestConnection()->quoteIdentifier($key)] = $row[$key];
-                unset($row[$key]);
-            }
+            $row[$this->demandDestConnection()->quoteIdentifier($key)] = $row[$key];
+            unset($row[$key]);
         }
     }
 }
