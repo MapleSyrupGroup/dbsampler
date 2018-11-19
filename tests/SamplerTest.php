@@ -37,13 +37,18 @@ class SamplerTest extends SqliteBasedTestCase
         $this->assertCount(4, $referenceStore->getReferencesByName('fruit_ids'));
     }
 
-    public function testMatchedWithWhereClause()
+    private function generateMatched()
     {
         $sampler = new Matched();
         $sampler->setTableName('fruit_x_basket');
         $sampler->setSourceConnection($this->sourceConnection);
         $sampler->setDestConnection($this->destConnection);
+        return $sampler;
+    }
 
+    public function testMatchedWithWhereClause()
+    {
+        $sampler = $this->generateMatched();
         $config = [
             'constraints' => ['fruit_id' => 1],
             'where' => ['basket_id > 1']
@@ -52,5 +57,25 @@ class SamplerTest extends SqliteBasedTestCase
         $sampler->execute();
 
         $this->assertCount(2, $sampler->getRows());
+    }
+
+    public function testMatchedWhereNoConstraints()
+    {
+        $sampler = $this->generateMatched();
+        $config = [
+            'where' => ['basket_id > 1']
+        ];
+        $sampler->loadConfig((object)$config);
+        $sampler->execute();
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function testMatchedNoConfigThrows()
+    {
+        $sampler = $this->generateMatched();
+        $sampler->loadConfig((object)[]);
+        $sampler->execute();
     }
 }
