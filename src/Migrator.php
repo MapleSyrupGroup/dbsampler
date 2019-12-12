@@ -228,12 +228,14 @@ class Migrator implements LoggerAwareInterface
     {
         // SchemaManager doesn't do enums!
         $destConnection->exec('DROP TABLE IF EXISTS ' . $sourceConnection->quoteIdentifier($table));
-
+        $triggerSql = [];
         $driverName = $sourceConnection->getDriver()->getName();
         if ($driverName === 'pdo_mysql') {
             $createSqlRow = $sourceConnection->query('SHOW CREATE TABLE ' . $sourceConnection->quoteIdentifier($table))
                 ->fetch(\PDO::FETCH_ASSOC);
             $createSql = $createSqlRow['Create Table'];
+            // find any triggers
+            $triggerSql = $this->checkTableTriggers($table, $sourceConnection);
         } elseif ($driverName === 'pdo_sqlite') {
             $schemaSql = 'SELECT SQL FROM sqlite_master WHERE NAME=' . $sourceConnection->quoteIdentifier($table);
             $createSql = $sourceConnection->query($schemaSql)->fetchColumn();
@@ -242,6 +244,49 @@ class Migrator implements LoggerAwareInterface
         }
 
         $destConnection->exec($createSql);
+        // create the triggers on the destination database table
+        foreach ($triggerSql as $sql) {
+            $destConnection->exec($sql);
+        }
+    }
+
+    /**
+     * Look for any triggers and regenerate the SQL to create them
+     *
+     * @param string     $table            Table name
+     * @param Connection $sourceConnection Originating DB connection
+     *
+     * @return array
+     * @throws \RuntimeException If DB type not supported
+     */
+    private function checkTableTriggers($table, Connection $sourceConnection)
+    {
+        $createTriggersSql = [];
+
+        $driverName = $sourceConnection->getDriver()->getName();
+        if ($driverName === 'pdo_mysql') {
+            $triggers = $sourceConnection->fetchAll('SHOW TRIGGERS WHERE `Table`=' . $sourceConnection->quote($table));
+            if ($triggers && count($triggers) > 0) {
+                foreach($triggers as $trigger) {
+                    $sql = 'CREATE TRIGGER ' . $trigger['Trigger'] . ' ' . $trigger['Timing'] . ' ' . $trigger['Event'] .
+                        ' ON ' . $sourceConnection->quoteIdentifier($trigger['Table']) . ' FOR EACH ROW ' .PHP_EOL . $trigger['Statement'] . '; ';
+                    $createTriggersSql[] = $sql;
+                }
+            }
+        } elseif ($driverName === 'pdo_sqlite') {
+            /* below is untested */
+            $schemaSql = "select sql from sqlite_master where type = 'trigger' AND tbl_name=" . $sourceConnection->quote($table);
+            $triggers = $sourceConnection->fetchAll($schemaSql);
+            if ($triggers && count($triggers) > 0) {
+                foreach($triggers as $trigger) {
+                    $createTriggersSql[] = $trigger['sql'];
+                }
+            }
+        } else {
+            throw new \RuntimeException(__METHOD__ . " not implemented for $driverName yet");
+        }
+
+        return $createTriggersSql;
     }
 
 
