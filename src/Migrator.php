@@ -267,7 +267,7 @@ class Migrator implements LoggerAwareInterface
         if ($driverName === 'pdo_mysql') {
             $triggers = $sourceConnection->fetchAll('SHOW TRIGGERS WHERE `Table`=' . $sourceConnection->quote($table));
             if ($triggers && count($triggers) > 0) {
-                foreach($triggers as $trigger) {
+                foreach ($triggers as $trigger) {
                     $sql = 'CREATE TRIGGER ' . $trigger['Trigger'] . ' ' . $trigger['Timing'] . ' ' . $trigger['Event'] .
                         ' ON ' . $sourceConnection->quoteIdentifier($trigger['Table']) . ' FOR EACH ROW ' .PHP_EOL . $trigger['Statement'] . '; ';
                     $createTriggersSql[] = $sql;
@@ -278,7 +278,7 @@ class Migrator implements LoggerAwareInterface
             $schemaSql = "select sql from sqlite_master where type = 'trigger' AND tbl_name=" . $sourceConnection->quote($table);
             $triggers = $sourceConnection->fetchAll($schemaSql);
             if ($triggers && count($triggers) > 0) {
-                foreach($triggers as $trigger) {
+                foreach ($triggers as $trigger) {
                     $createTriggersSql[] = $trigger['sql'];
                 }
             }
