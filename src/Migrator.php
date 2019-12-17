@@ -228,7 +228,7 @@ class Migrator implements LoggerAwareInterface
     {
         // SchemaManager doesn't do enums!
         $destConnection->exec('DROP TABLE IF EXISTS ' . $sourceConnection->quoteIdentifier($table));
-        $triggerSql = [];
+
         $driverName = $sourceConnection->getDriver()->getName();
         if ($driverName === 'pdo_mysql') {
             $createSqlRow = $sourceConnection->query('SHOW CREATE TABLE ' . $sourceConnection->quoteIdentifier($table))
@@ -236,13 +236,15 @@ class Migrator implements LoggerAwareInterface
             $createSql = $createSqlRow['Create Table'];
             $triggerSql = $this->generateTableTriggerSql($table, $sourceConnection);
         } elseif ($driverName === 'pdo_sqlite') {
-            $schemaSql = 'SELECT SQL FROM sqlite_master WHERE NAME=' . $sourceConnection->quoteIdentifier($table);
+            $schemaSql = 'SELECT sql FROM sqlite_master WHERE type="table" AND tbl_name=' . $sourceConnection->quoteIdentifier($table);
             $createSql = $sourceConnection->query($schemaSql)->fetchColumn();
+            $triggerSql = $this->generateTableTriggerSql($table, $sourceConnection);
         } else {
             throw new \RuntimeException(__METHOD__ . " not implemented for $driverName yet");
         }
 
         $destConnection->exec($createSql);
+
         // create the triggers on the destination database table
         foreach ($triggerSql as $sql) {
             $destConnection->exec($sql);
@@ -263,6 +265,7 @@ class Migrator implements LoggerAwareInterface
         $createTriggersSql = [];
 
         $driverName = $sourceConnection->getDriver()->getName();
+
         if ($driverName === 'pdo_mysql') {
             $triggers = $sourceConnection->fetchAll('SHOW TRIGGERS WHERE `Table`=' . $sourceConnection->quote($table));
             if ($triggers && count($triggers) > 0) {
@@ -273,7 +276,6 @@ class Migrator implements LoggerAwareInterface
                 }
             }
         } elseif ($driverName === 'pdo_sqlite') {
-            /* below is untested */
             $schemaSql = "select sql from sqlite_master where type = 'trigger' AND tbl_name=" . $sourceConnection->quote($table);
             $triggers = $sourceConnection->fetchAll($schemaSql);
             if ($triggers && count($triggers) > 0) {
