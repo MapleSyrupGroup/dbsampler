@@ -234,8 +234,7 @@ class Migrator implements LoggerAwareInterface
             $createSqlRow = $sourceConnection->query('SHOW CREATE TABLE ' . $sourceConnection->quoteIdentifier($table))
                 ->fetch(\PDO::FETCH_ASSOC);
             $createSql = $createSqlRow['Create Table'];
-            // find any triggers
-            $triggerSql = $this->checkTableTriggers($table, $sourceConnection);
+            $triggerSql = $this->generateTableTriggerSql($table, $sourceConnection);
         } elseif ($driverName === 'pdo_sqlite') {
             $schemaSql = 'SELECT SQL FROM sqlite_master WHERE NAME=' . $sourceConnection->quoteIdentifier($table);
             $createSql = $sourceConnection->query($schemaSql)->fetchColumn();
@@ -251,7 +250,7 @@ class Migrator implements LoggerAwareInterface
     }
 
     /**
-     * Look for any triggers and regenerate the SQL to create them
+     * Regenerate the SQL to create any triggers from the table
      *
      * @param string     $table            Table name
      * @param Connection $sourceConnection Originating DB connection
@@ -259,7 +258,7 @@ class Migrator implements LoggerAwareInterface
      * @return array
      * @throws \RuntimeException If DB type not supported
      */
-    private function checkTableTriggers($table, Connection $sourceConnection)
+    private function generateTableTriggerSql($table, Connection $sourceConnection)
     {
         $createTriggersSql = [];
 
