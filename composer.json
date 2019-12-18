@@ -11,7 +11,7 @@
         "pimple/pimple": "^3.0"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.0",
+        "friendsofphp/php-cs-fixer": "2.16.0",
         "phpunit/phpunit": "^5.7",
         "roave/security-advisories": "dev-master",
         "squizlabs/php_codesniffer": "^2.7"
