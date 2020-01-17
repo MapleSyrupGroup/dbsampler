@@ -270,7 +270,7 @@ class Migrator implements LoggerAwareInterface
                     $destConnection->exec($sql);
                 }
                 if (count($triggerSql)) {
-                  $this->getLogger()->info("$this->migrationSetName: Migrated " . count($triggerSql) . " trigger(s) on $table");
+                    $this->getLogger()->info("$this->migrationSetName: Migrated " . count($triggerSql) . " trigger(s) on $table");
                 }
             } catch (\Exception $e) {
                 $this->getLogger()->error(
