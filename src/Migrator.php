@@ -45,6 +45,11 @@ class Migrator implements LoggerAwareInterface
     protected $viewsToMigrate = [];
 
     /**
+     * @var string[]
+     */
+    protected $tableTriggers = [];
+
+    /**
      * Object that can create a Doctrine\DBAL\Connection from DB name
      *
      * @var DatabaseConnectionFactoryInterface
@@ -165,6 +170,8 @@ class Migrator implements LoggerAwareInterface
         foreach ($this->viewsToMigrate as $view) {
             $this->migrateView($view, $sourceConnection, $destConnection);
         }
+
+        $this->applyTriggersToDestTable($destConnection);
     }
 
     /**
@@ -234,19 +241,31 @@ class Migrator implements LoggerAwareInterface
             $createSqlRow = $sourceConnection->query('SHOW CREATE TABLE ' . $sourceConnection->quoteIdentifier($table))
                 ->fetch(\PDO::FETCH_ASSOC);
             $createSql = $createSqlRow['Create Table'];
-            $triggerSql = $this->generateTableTriggerSql($table, $sourceConnection);
+            $this->generateTableTriggerSql($table, $sourceConnection);
         } elseif ($driverName === 'pdo_sqlite') {
             $schemaSql = 'SELECT sql FROM sqlite_master WHERE type="table" AND tbl_name=' . $sourceConnection->quoteIdentifier($table);
             $createSql = $sourceConnection->query($schemaSql)->fetchColumn();
-            $triggerSql = $this->generateTableTriggerSql($table, $sourceConnection);
+            $this->generateTableTriggerSql($table, $sourceConnection);
         } else {
             throw new \RuntimeException(__METHOD__ . " not implemented for $driverName yet");
         }
 
         $destConnection->exec($createSql);
+    }
 
+    /**
+     * Apply any stored table triggers to the destination database.
+     * This should be done after the data has been inserted
+     *
+     * @param Connection $destConnection   Target DB connection
+     *
+     * @return void
+     * @throws \Doctrine\DBAL\DBALException If table trigger recreated
+     */
+    private function applyTriggersToDestTable(Connection $destConnection)
+    {
         // create the triggers on the destination database table
-        foreach ($triggerSql as $sql) {
+        foreach ($this->tableTriggers as $sql) {
             $destConnection->exec($sql);
         }
     }
@@ -257,13 +276,11 @@ class Migrator implements LoggerAwareInterface
      * @param string     $table            Table name
      * @param Connection $sourceConnection Originating DB connection
      *
-     * @return array
+     * @return void
      * @throws \RuntimeException If DB type not supported
      */
     private function generateTableTriggerSql($table, Connection $sourceConnection)
     {
-        $createTriggersSql = [];
-
         $driverName = $sourceConnection->getDriver()->getName();
 
         if ($driverName === 'pdo_mysql') {
@@ -272,7 +289,7 @@ class Migrator implements LoggerAwareInterface
                 foreach ($triggers as $trigger) {
                     $sql = 'CREATE TRIGGER ' . $trigger['Trigger'] . ' ' . $trigger['Timing'] . ' ' . $trigger['Event'] .
                         ' ON ' . $sourceConnection->quoteIdentifier($trigger['Table']) . ' FOR EACH ROW ' .PHP_EOL . $trigger['Statement'] . '; ';
-                    $createTriggersSql[] = $sql;
+                    $this->tableTriggers[] = $sql;
                 }
             }
         } elseif ($driverName === 'pdo_sqlite') {
@@ -280,14 +297,12 @@ class Migrator implements LoggerAwareInterface
             $triggers = $sourceConnection->fetchAll($schemaSql);
             if ($triggers && count($triggers) > 0) {
                 foreach ($triggers as $trigger) {
-                    $createTriggersSql[] = $trigger['sql'];
+                    $this->tableTriggers[] = $trigger['sql'];
                 }
             }
         } else {
             throw new \RuntimeException(__METHOD__ . " not implemented for $driverName yet");
         }
-
-        return $createTriggersSql;
     }
 
 
