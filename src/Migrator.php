@@ -171,7 +171,7 @@ class Migrator implements LoggerAwareInterface
             $this->migrateView($view, $sourceConnection, $destConnection);
         }
 
-        $this->applyTriggersToDestTable($destConnection);
+        $this->applyTriggers($destConnection);
     }
 
     /**
@@ -257,16 +257,15 @@ class Migrator implements LoggerAwareInterface
      * Apply any stored table triggers to the destination database.
      * This should be done after the data has been inserted
      *
-     * @param Connection $destConnection   Target DB connection
+     * @param Connection $dbConnection   Target DB connection
      *
      * @return void
      * @throws \Doctrine\DBAL\DBALException If table trigger recreated
      */
-    private function applyTriggersToDestTable(Connection $destConnection)
+    private function applyTriggers(Connection $dbConnection)
     {
-        // create the triggers on the destination database table
         foreach ($this->tableTriggers as $sql) {
-            $destConnection->exec($sql);
+            $dbConnection->exec($sql);
         }
     }
 
