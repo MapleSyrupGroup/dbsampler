@@ -247,7 +247,7 @@ class Migrator implements LoggerAwareInterface
     }
 
     /**
-     * Ensure that all table triggers from source are reccreated in the destination
+     * Ensure that all table triggers from source are recreated in the destination
      *
      * @param Connection $sourceConnection Originating DB connection
      * @param Connection $destConnection   Target DB connection
