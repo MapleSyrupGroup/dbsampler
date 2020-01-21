@@ -45,11 +45,6 @@ class Migrator implements LoggerAwareInterface
     protected $viewsToMigrate = [];
 
     /**
-     * @var string[]
-     */
-    protected $tableTriggers = [];
-
-    /**
      * Object that can create a Doctrine\DBAL\Connection from DB name
      *
      * @var DatabaseConnectionFactoryInterface
