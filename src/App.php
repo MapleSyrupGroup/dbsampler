@@ -8,6 +8,7 @@ use Pimple\Container;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Quidco\DbSampler\Migrator\Migrator;
 
 /**
  * Dependency container / app for DbSampler

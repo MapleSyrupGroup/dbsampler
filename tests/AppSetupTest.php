@@ -9,24 +9,12 @@ use Quidco\DbSampler\App;
  */
 class AppSetupTest extends SqliteBasedTestCase
 {
-
-
-    /**
-     * Run at least one test to confirm that tests are working!
-     *
-     * @return void
-     */
-    public function testTrivial()
-    {
-        $this->assertTrue(true);
-    }
-
     /**
      * Run the example migration
      *
      * @return void
      */
-    public function testSampleMigration()
+    public function testSampleMigration(): void
     {
         $app = new App();
         $this->assertInstanceOf(App::class, $app);
@@ -47,7 +35,7 @@ class AppSetupTest extends SqliteBasedTestCase
      *
      * @return void
      */
-    public function testSqliteCredentialMissingDirectoryHandling()
+    public function testSqliteCredentialMissingDirectoryHandling(): void
     {
         $app = new App();
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-no-dir.json');
@@ -61,7 +49,7 @@ class AppSetupTest extends SqliteBasedTestCase
      *
      * @return void
      */
-    public function testSqliteCredentialRelativeDirectoryHandling()
+    public function testSqliteCredentialRelativeDirectoryHandling(): void
     {
         $app = new App();
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-relative-dir.json');
@@ -79,7 +67,7 @@ class AppSetupTest extends SqliteBasedTestCase
      *
      * @return void
      */
-    public function testSqliteCredentialSourceDestDirectoryHandling()
+    public function testSqliteCredentialSourceDestDirectoryHandling(): void
     {
         $app = new App();
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-source-dest.json');

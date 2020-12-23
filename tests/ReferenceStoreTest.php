@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 class ReferenceStoreTest extends TestCase
 {
-    public function testBasicFunctions()
+    public function testBasicFunctions(): void
     {
         $store = new ReferenceStore();
         $primes = [1, 3, 5, 7];

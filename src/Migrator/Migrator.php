@@ -1,9 +1,10 @@
 <?php
 
-namespace Quidco\DbSampler;
+namespace Quidco\DbSampler\Migrator;
 
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
+use Quidco\DbSampler\SamplerInterface;
 
 /**
  * Migrator class to handle all migrations in a set
