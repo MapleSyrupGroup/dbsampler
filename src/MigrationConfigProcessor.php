@@ -59,8 +59,6 @@ class MigrationConfigProcessor
             throw new \RuntimeException("Source and dest DBs must not match for '{$configuration->name}'");
         }
 
-        $migrator->setSourceDb($configuration->sourceDb);
-        $migrator->setDestinationDb($configuration->destDb);
         $tables = (array)$configuration->tables;
         $migrator->clearTableMigrations();
         foreach ($tables as $table => $migrationSpec) {
@@ -78,13 +76,10 @@ class MigrationConfigProcessor
     /**
      * Build a SamplerInterface object from configuration
      *
-     * @param \stdClass $migrationSpec Config
-     *
-     * @return SamplerInterface
      * @throws \UnexpectedValueException If bad object created - should be impossible
      * @throws \RuntimeException On invalid specification
      */
-    private function buildTableSampler($migrationSpec)
+    private function buildTableSampler(\stdClass $migrationSpec): SamplerInterface
     {
         $sampler = null;
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace Quidco\DbSampler;
 
 use Doctrine\DBAL\Connection;
@@ -76,14 +77,17 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
      */
     public function performMigrationSet($name)
     {
-        $migrator = new Migrator($name);
-        $migrator->setLogger($this->getLogger());
-        $migrator->setDatabaseConnectionFactory($this);
-
         $migrationConfigProcessor = new MigrationConfigProcessor();
-        $migrationConfigProcessor->configureMigratorFromConfig($migrator, $this["db.migrations.$name"]);
 
-        $migrator->execute();
+        $configuration = $this["db.migrations.$name"];
+
+        $sourceConnection = $this->createSourceConnectionByDbName($configuration->sourceDb);
+        $destConnection = $this->createDestConnectionByDbName($configuration->destDb);
+
+        $migrator = new Migrator($sourceConnection, $destConnection, $this->getLogger());
+        $migrationConfigProcessor->configureMigratorFromConfig($migrator, $configuration);
+
+        $migrator->execute($name);
     }
 
     /**
@@ -117,7 +121,7 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
     /**
      * Create connection object for DB name / direction. Other credentials (host, password etc) must already be known
      *
-     * @param string $name      Database name
+     * @param string $name Database name
      * @param string $direction Determines whether 'source' or 'dest' credentials used, must be one of those values
      *
      * @return Connection
