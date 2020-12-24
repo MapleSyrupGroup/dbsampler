@@ -5,17 +5,13 @@ namespace Quidco\DbSampler\Migrator;
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
 use Quidco\DbSampler\Collection\TableCollection;
+use Quidco\DbSampler\Collection\ViewCollection;
 
 /**
  * Migrator class to handle all migrations in a set
  */
 class Migrator
 {
-    /**
-     * @var string[]
-     */
-    protected $viewsToMigrate = [];
-
     /**
      * @var LoggerInterface
      */
@@ -48,7 +44,7 @@ class Migrator
      *
      * @throws \Exception Rethrows any exceptions after logging
      */
-    public function execute(string $setName, TableCollection $tableCollection): void
+    public function execute(string $setName, TableCollection $tableCollection, ViewCollection $viewCollection): void
     {
         foreach ($tableCollection->getTables() as $table => $sampler) {
             try {
@@ -66,32 +62,13 @@ class Migrator
             }
         }
 
-        foreach ($this->viewsToMigrate as $view) {
+        foreach ($viewCollection->getViews() as $view) {
             $this->migrateView($view, $setName);
         }
 
         $this->migrateTableTriggers($setName, $tableCollection);
     }
 
-    /**
-     * Reset the list of view migrations to be empty
-     *
-     * @return void
-     */
-    public function clearViewMigrations()
-    {
-        $this->viewsToMigrate = [];
-    }
-
-    /**
-     * Add view to be migrated, by name
-     *
-     * @param string $view Name of view to add
-     */
-    public function addViewToMigrate($view): void
-    {
-        $this->viewsToMigrate[] = $view;
-    }
 
     /**
      * Ensure that the specified table is present in the destination DB as an empty copy of the source

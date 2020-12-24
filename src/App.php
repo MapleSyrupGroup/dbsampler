@@ -9,6 +9,7 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Quidco\DbSampler\Collection\TableCollection;
+use Quidco\DbSampler\Collection\ViewCollection;
 use Quidco\DbSampler\Configuration\MigrationConfigurationCollection;
 use Quidco\DbSampler\Migrator\Migrator;
 
@@ -76,14 +77,10 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
 
         $migrator = new Migrator($sourceConnection, $destConnection, $this->getLogger());
 
-        // @todo: configure views and send collection to the migrator
-        foreach ($configuration->getViews() as $view) {
-            $migrator->addViewToMigrate($view);
-        }
-
         $tableCollection = TableCollection::fromConfig($configuration);
+        $viewCollection = ViewCollection::fromConfig($configuration);
 
-        $migrator->execute($name, $tableCollection);
+        $migrator->execute($name, $tableCollection, $viewCollection);
     }
 
     /**
