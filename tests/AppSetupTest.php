@@ -3,6 +3,7 @@
 namespace Quidco\DbSampler\Tests;
 
 use Quidco\DbSampler\App;
+use Quidco\DbSampler\Configuration\MigrationConfigurationCollection;
 
 /**
  * Class AppSetupTest
@@ -16,9 +17,11 @@ class AppSetupTest extends SqliteBasedTestCase
      */
     public function testSampleMigration(): void
     {
-        $app = new App();
+        $config = MigrationConfigurationCollection::fromFilePaths([$this->fixturesDir . '/small_sqlite_migration.json']);
+
+        $app = new App($config);
         $this->assertInstanceOf(App::class, $app);
-        $app->loadDatabaseConfigFile($this->fixturesDir . '/small_sqlite_migration.json');
+
         $this->assertSame(['small-sqlite-test'], $app->getConfiguredMigrationNames());
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials.json');
         $app->performMigrationSet('small-sqlite-test');
@@ -34,13 +37,14 @@ class AppSetupTest extends SqliteBasedTestCase
      * Check that sqlite credential files handle missing directory field correctly
      *
      * @return void
+     * @expectedException \RuntimeException
      */
     public function testSqliteCredentialMissingDirectoryHandling(): void
     {
-        $app = new App();
+        $config = MigrationConfigurationCollection::fromFilePaths([$this->fixturesDir . '/small_sqlite_migration.json']);
+
+        $app = new App($config);
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-no-dir.json');
-        $app->loadDatabaseConfigFile($this->fixturesDir . '/small_sqlite_migration.json');
-        $this->expectException(\RuntimeException::class);
         $app->createDestConnectionByDbName('small-sqlite-source'); // directory tested at connection time now
     }
 
@@ -51,7 +55,9 @@ class AppSetupTest extends SqliteBasedTestCase
      */
     public function testSqliteCredentialRelativeDirectoryHandling(): void
     {
-        $app = new App();
+        $config = MigrationConfigurationCollection::fromFilePaths([$this->fixturesDir . '/small_sqlite_migration.json']);
+
+        $app = new App($config);
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-relative-dir.json');
         $app->loadDatabaseConfigFile($this->fixturesDir . '/small_sqlite_migration.json');
         $app->createDestConnectionByDbName('small-sqlite-source');
@@ -69,9 +75,11 @@ class AppSetupTest extends SqliteBasedTestCase
      */
     public function testSqliteCredentialSourceDestDirectoryHandling(): void
     {
-        $app = new App();
+        $config = MigrationConfigurationCollection::fromFilePaths([$this->fixturesDir . '/small_sqlite_migration.json']);
+
+        $app = new App($config);
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-source-dest.json');
-        $app->loadDatabaseConfigFile($this->fixturesDir . '/small_sqlite_migration.json');
+
         $destConn = $app->createDestConnectionByDbName('small-sqlite-source');
         $this->assertInstanceOf(\Doctrine\DBAL\Connection::class, $destConn);
     }

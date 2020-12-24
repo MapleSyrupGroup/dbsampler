@@ -8,6 +8,8 @@ use Pimple\Container;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Quidco\DbSampler\Collection\TableCollection;
+use Quidco\DbSampler\Configuration\MigrationConfigurationCollection;
 use Quidco\DbSampler\Migrator\Migrator;
 
 /**
@@ -30,6 +32,16 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
     protected $configuredMigrationNames = [];
 
     /**
+     * @var MigrationConfigurationCollection
+     */
+    private $databaseConfigurationCollection;
+
+    public function __construct(MigrationConfigurationCollection $databaseConfigurationCollection)
+    {
+        $this->databaseConfigurationCollection = $databaseConfigurationCollection;
+    }
+
+    /**
      * Load common DB credentials file
      *
      * @param string $filename Path to credentials.json
@@ -49,46 +61,29 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
     }
 
     /**
-     * Load migration specification for a single database
-     *
-     * @param string $filename Path to specification file
-     *
-     * @return void
-     * @throws \RuntimeException If config is invalid
-     */
-    public function loadDatabaseConfigFile($filename)
-    {
-        $config = json_decode(file_get_contents($filename));
-        $name = $config->name;
-        if (!$name) {
-            throw new \RuntimeException("Migration file '$filename' has no name field");
-        }
-
-        $this->configuredMigrationNames[] = $name;
-        $this["db.migrations.$name"] = $config;
-    }
-
-    /**
      * Perform migrations from a named set
      *
      * @param string $name Migration name as specified in a .db.json migration file
      *
-     * @return void
      * @throws \RuntimeException If config is invalid
      */
-    public function performMigrationSet($name)
+    public function performMigrationSet($name): void
     {
-        $migrationConfigProcessor = new MigrationConfigProcessor();
+        $configuration = $this->databaseConfigurationCollection->get($name);
 
-        $configuration = $this["db.migrations.$name"];
-
-        $sourceConnection = $this->createSourceConnectionByDbName($configuration->sourceDb);
-        $destConnection = $this->createDestConnectionByDbName($configuration->destDb);
+        $sourceConnection = $this->createSourceConnectionByDbName($configuration->getSourceDbName());
+        $destConnection = $this->createDestConnectionByDbName($configuration->getDestinationDbName());
 
         $migrator = new Migrator($sourceConnection, $destConnection, $this->getLogger());
-        $migrationConfigProcessor->configureMigratorFromConfig($migrator, $configuration);
 
-        $migrator->execute($name);
+        // @todo: configure views and send collection to the migrator
+        foreach ($configuration->getViews() as $view) {
+            $migrator->addViewToMigrate($view);
+        }
+
+        $tableCollection = TableCollection::fromConfig($configuration);
+
+        $migrator->execute($name, $tableCollection);
     }
 
     /**
@@ -129,7 +124,7 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
      * @throws \UnexpectedValueException If configuration is invalid
      * @throws \Doctrine\DBAL\DBALException If connection cannot be made
      */
-    protected function createConnectionByDbName($name, $direction = self::CONNECTION_SOURCE)
+    protected function createConnectionByDbName($name, $direction): Connection
     {
         if (!isset($this["db.connections.$name"])) {
             $dbcredentials = isset($this["db.credentials"]->$direction) ?
@@ -216,6 +211,6 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
      */
     public function getConfiguredMigrationNames()
     {
-        return $this->configuredMigrationNames;
+        return $this->databaseConfigurationCollection->listConfigurations();
     }
 }

@@ -4,20 +4,13 @@ namespace Quidco\DbSampler\Migrator;
 
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
-use Quidco\DbSampler\SamplerInterface;
+use Quidco\DbSampler\Collection\TableCollection;
 
 /**
  * Migrator class to handle all migrations in a set
  */
 class Migrator
 {
-    /**
-     * Table samplers
-     *
-     * @var SamplerInterface[]
-     */
-    protected $tableMigrations = [];
-
     /**
      * @var string[]
      */
@@ -55,9 +48,9 @@ class Migrator
      *
      * @throws \Exception Rethrows any exceptions after logging
      */
-    public function execute(string $setName): void
+    public function execute(string $setName, TableCollection $tableCollection): void
     {
-        foreach ($this->tableMigrations as $table => $sampler) {
+        foreach ($tableCollection->getTables() as $table => $sampler) {
             try {
                 $this->ensureEmptyTargetTable($table, $this->sourceConnection, $this->destConnection);
                 $sampler->setTableName($table);
@@ -77,17 +70,7 @@ class Migrator
             $this->migrateView($view, $setName);
         }
 
-        $this->migrateTableTriggers($setName);
-    }
-
-    /**
-     * Reset the list of table samplers to be empty
-     *
-     * @return void
-     */
-    public function clearTableMigrations()
-    {
-        $this->tableMigrations = [];
+        $this->migrateTableTriggers($setName, $tableCollection);
     }
 
     /**
@@ -98,20 +81,6 @@ class Migrator
     public function clearViewMigrations()
     {
         $this->viewsToMigrate = [];
-    }
-
-    /**
-     * Add a SamplerInterface object to handle a named table
-     *
-     * @param string $table Table name
-     * @param SamplerInterface $sampler Sampler class
-     *
-     * @return void
-     */
-    public function addTableSampler($table, SamplerInterface $sampler)
-    {
-        //TODO these might need to be in order
-        $this->tableMigrations[$table] = $sampler;
     }
 
     /**
@@ -162,9 +131,9 @@ class Migrator
      * @throws \RuntimeException If DB type not supported
      * @throws \Doctrine\DBAL\DBALException If target trigger cannot be recreated
      */
-    private function migrateTableTriggers(string $setName): void
+    private function migrateTableTriggers(string $setName, TableCollection $tableCollection): void
     {
-        foreach ($this->tableMigrations as $table => $sampler) {
+        foreach ($tableCollection->getTables() as $table => $sampler) {
             try {
                 $triggerSql = $this->generateTableTriggerSql($table, $this->sourceConnection);
                 foreach ($triggerSql as $sql) {
