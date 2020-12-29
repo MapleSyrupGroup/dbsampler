@@ -6,7 +6,7 @@ use Quidco\DbSampler\ReferenceStore;
 
 class ReferenceStoreTest extends \PHPUnit_Framework_TestCase
 {
-    public function testBasicFunctions()
+    public function testBasicFunctions(): void
     {
         $store = new ReferenceStore();
         $primes = [1, 3, 5, 7];

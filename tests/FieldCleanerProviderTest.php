@@ -16,7 +16,7 @@ class FieldCleanerProviderTest extends \PHPUnit_Framework_TestCase
         $this->fieldCleaner = new FieldCleanerProvider();
     }
 
-    public function randomDigitsProvider()
+    public function randomDigitsProvider(): array
     {
         return [
             [5],
@@ -27,10 +27,8 @@ class FieldCleanerProviderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider randomDigitsProvider
-     *
-     * @param $numDigits
      */
-    public function testRandomDigits($numDigits)
+    public function testRandomDigits(int $numDigits): void
     {
         $randomDigitCleaner = $this->fieldCleaner->getCleanerByDescription('randomdigits:' . $numDigits);
 
@@ -41,7 +39,7 @@ class FieldCleanerProviderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($numDigits, strlen($cleaned));
     }
 
-    public function testRandomDigitsDefault()
+    public function testRandomDigitsDefault(): void
     {
         $randomDigitCleaner = $this->fieldCleaner->getCleanerByDescription('randomdigits');
 
