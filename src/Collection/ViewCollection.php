@@ -13,7 +13,7 @@ class ViewCollection
         $this->views = $views;
     }
 
-    public function fromConfig(MigrationConfiguration $configuration): self
+    public static function fromConfig(MigrationConfiguration $configuration): self
     {
         return new self($configuration->getViews());
     }
