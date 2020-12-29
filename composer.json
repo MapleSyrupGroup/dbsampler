@@ -1,6 +1,6 @@
 {
-    "name": "maple-syrup-group/dbsampler",
-    "description": "Rule-based generation of fixture databases by sampling operational databases",
+    "name": "nealio82/dbsampler",
+    "description": "Rule-based generation of fixture databases by sampling operational databases. Forked from maple-syrup-group/dbsampler",
     "license": "MIT",
     "type": "project",
     "bin": ["bin/dbsampler"],
@@ -20,6 +20,9 @@
         {
           "name": "Maple Syrup Media",
           "email": "tech@quidco.com"
+        },
+        {
+          "name": "Neal Brooks"
         }
     ],
     "autoload": {
