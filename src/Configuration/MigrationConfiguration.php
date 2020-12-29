@@ -21,9 +21,7 @@ class MigrationConfiguration
             throw new \RuntimeException("Migration JSON config was not valid");
         }
 
-        $name = $config->name;
-
-        if (!$name) {
+        if (!isset($config->name)) {
             throw new \RuntimeException("Migration file has no name field");
         }
 
@@ -37,12 +35,12 @@ class MigrationConfiguration
 
     public function getTables(): array
     {
-        return (array) $this->config->tables;
+        return (array)$this->config->tables;
     }
 
     public function getViews(): array
     {
-        return (array)$this->config->views;
+        return $this->config->views ?? [];
     }
 
     public function getSourceDbName(): string
