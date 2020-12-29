@@ -7,7 +7,7 @@
     "require": {
         "doctrine/dbal": "^2.5",
         "fakerphp/faker": "^1.13",
-        "monolog/monolog": "^1.22",
+        "monolog/monolog": "^1.22||^2.0.0",
         "pimple/pimple": "^3.0"
     },
     "require-dev": {
