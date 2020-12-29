@@ -3,7 +3,6 @@
 
 namespace Quidco\DbSampler\Configuration;
 
-
 class MigrationConfigurationCollection
 {
     /**
@@ -31,7 +30,6 @@ class MigrationConfigurationCollection
                     $config = MigrationConfiguration::fromJson(file_get_contents($file));
 
                     $configs[$config->getName()] = $config;
-
                 }
             } catch (\RuntimeException $e) {
                 print("Migration file '$migrationFilePath' is invalid " . $e->getMessage());

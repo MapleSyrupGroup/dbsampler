@@ -32,8 +32,7 @@ class Migrator
         Connection $sourceConnection,
         Connection $destConnection,
         LoggerInterface $logger
-    )
-    {
+    ) {
         $this->sourceConnection = $sourceConnection;
         $this->destConnection = $destConnection;
         $this->logger = $logger;

@@ -3,7 +3,6 @@
 
 namespace Quidco\DbSampler\Configuration;
 
-
 class MigrationConfiguration
 {
     private $config;
