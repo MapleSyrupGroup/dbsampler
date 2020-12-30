@@ -3,8 +3,6 @@
 
 namespace Quidco\DbSampler\Cleaner;
 
-// @todo: add ability to register custom types
-
 use Faker\Factory;
 use Quidco\DbSampler\Cleaner\FieldCleaner\DateTime;
 use Quidco\DbSampler\Cleaner\FieldCleaner\EmailAddress;
