@@ -41,7 +41,6 @@ class Migrator
         Connection $destConnection,
         LoggerInterface $logger
     ) {
-    
         $this->sourceConnection = $sourceConnection;
         $this->destConnection = $destConnection;
         $this->logger = $logger;
@@ -61,8 +60,6 @@ class Migrator
             try {
                 $this->ensureEmptyTargetTable($table, $this->sourceConnection, $this->destConnection);
                 $sampler->setTableName($table);
-                $sampler->setSourceConnection($this->sourceConnection);
-                $sampler->setDestConnection($this->destConnection);
                 $rows = $sampler->execute();
                 $this->logger->info("$setName: migrated '$table' with '" . $sampler->getName() . "': $rows rows");
             } catch (\Exception $e) {
@@ -218,7 +215,6 @@ class Migrator
         $this->logger->info("$setName: migrated view '$view'");
     }
 
-
     /**
      * Build a SamplerInterface object from configuration
      *
@@ -233,12 +229,15 @@ class Migrator
         $samplerType = strtolower($migrationSpec->sampler);
         if (array_key_exists($samplerType, SamplerMap::MAP)) {
             $samplerClass = SamplerMap::MAP[$samplerType];
-            $sampler = new $samplerClass($migrationSpec);
+            $sampler = new $samplerClass(
+                $migrationSpec,
+                $this->referenceStore,
+                $this->sourceConnection,
+                $this->destConnection
+            );
             if (!$sampler instanceof SamplerInterface) {
                 throw new \UnexpectedValueException('Invalid sampler created');
             }
-            /** @var SamplerInterface $sampler */
-            $sampler->setReferenceStore($this->referenceStore);
         } else {
             throw new \RuntimeException("Unrecognised sampler type '$samplerType' required");
         }

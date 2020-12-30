@@ -61,6 +61,24 @@ abstract class BaseSampler implements SamplerInterface
      */
     protected $config;
 
+
+    public function __construct(
+        \stdClass $config,
+        ReferenceStore $referenceStore,
+        Connection $sourceConnection,
+        Connection $destConnection
+    )
+    {
+        $this->config = $config;
+        $this->referenceStore = $referenceStore;
+
+        $this->referenceFields = isset($config->remember) ? $config->remember : [];
+        $this->limit = isset($config->limit) ? (int)$config->limit : false;
+        $this->postImportSql = isset($config->postImportSql) ? $config->postImportSql : [];
+        $this->sourceConnection = $sourceConnection;
+        $this->destConnection = $destConnection;
+    }
+
     /**
      * Set table name
      *
@@ -73,67 +91,6 @@ abstract class BaseSampler implements SamplerInterface
         $this->tableName = $tableName;
 
         return $this;
-    }
-
-    /**
-     * Set connection to source DB
-     *
-     * @param Connection $sourceConnection Source connection
-     *
-     * @return BaseSampler
-     */
-    public function setSourceConnection(Connection $sourceConnection)
-    {
-        $this->sourceConnection = $sourceConnection;
-
-        return $this;
-    }
-
-    /**
-     * Set connection to dest DB
-     *
-     * @param Connection $destConnection Dest connection
-     *
-     * @return BaseSampler
-     */
-    public function setDestConnection(Connection $destConnection)
-    {
-        $this->destConnection = $destConnection;
-
-        return $this;
-    }
-
-    /**
-     * Get loaded ReferenceStore
-     *
-     * @return ReferenceStore
-     */
-    public function getReferenceStore()
-    {
-        return $this->referenceStore;
-    }
-
-    /**
-     * Set a ReferenceStore to save ids as required
-     *
-     * @param ReferenceStore $referenceStore ReferenceStore object
-     *
-     * @return BaseSampler
-     */
-    public function setReferenceStore(ReferenceStore $referenceStore)
-    {
-        $this->referenceStore = $referenceStore;
-
-        return $this;
-    }
-
-    public function __construct(\stdClass $config)
-    {
-        $this->config = $config;
-
-        $this->referenceFields = isset($config->remember) ? $config->remember : [];
-        $this->limit = isset($config->limit) ? (int)$config->limit : false;
-        $this->postImportSql = isset($config->postImportSql) ? $config->postImportSql : [];
     }
 
     /**
@@ -158,35 +115,22 @@ abstract class BaseSampler implements SamplerInterface
             foreach ($this->referenceFields as $key => $variable) {
                 $references[$variable][] = $row[$key];
             }
-
-            $this->sanitiseRowKeys($row);
-            $this->demandDestConnection()->insert($this->tableName, $row);
         }
 
         foreach ($references as $reference => $values) {
             $this->referenceStore->setReferencesByName($reference, $values);
         }
 
+        foreach ($rows as $row) {
+            $this->sanitiseRowKeys($row);
+            $this->destConnection->insert($this->tableName, $row);
+        }
+
         foreach ($this->postImportSql as $sql) {
-            $this->demandDestConnection()->exec($sql);
+            $this->destConnection->exec($sql);
         }
 
         return count($rows);
-    }
-
-    /**
-     * A more insistent get() - throws exception if not configured
-     *
-     * @return Connection
-     * @throws \RuntimeException If exception not configured
-     */
-    protected function demandDestConnection()
-    {
-        if (!$this->destConnection) {
-            throw new \RuntimeException('Dest connection not present');
-        }
-
-        return $this->destConnection;
     }
 
     /**
@@ -224,7 +168,7 @@ abstract class BaseSampler implements SamplerInterface
     {
         /** @noinspection ForeachOnArrayComponentsInspection */
         foreach (array_keys($row) as $key) {
-            $row[$this->demandDestConnection()->quoteIdentifier($key)] = $row[$key];
+            $row[$this->destConnection->quoteIdentifier($key)] = $row[$key];
             unset($row[$key]);
         }
     }

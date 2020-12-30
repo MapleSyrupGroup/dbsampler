@@ -6,43 +6,59 @@ use Quidco\DbSampler\ReferenceStore;
 use Quidco\DbSampler\Sampler\AllRows;
 use Quidco\DbSampler\Sampler\None;
 use Quidco\DbSampler\Sampler\MatchedRows;
+use Quidco\DbSampler\SamplerInterface;
 
 class SamplerTest extends SqliteBasedTestCase
 {
     public function testEmptySampler(): void
     {
-        $sampler = new None((object)[]);
+        $sampler = new None(
+            (object)[],
+            new ReferenceStore(),
+            $this->sourceConnection,
+            $this->destConnection
+        );
         $this->assertSame([], $sampler->getRows());
     }
 
     public function testCopyAllSampler(): void
     {
-        $sampler = new AllRows((object)[]);
+        $sampler = new AllRows(
+            (object)[],
+            new ReferenceStore(),
+            $this->sourceConnection,
+            $this->destConnection
+        );
         $sampler->setTableName('fruits');
-        $sampler->setSourceConnection($this->sourceConnection);
         $this->assertCount(4, $sampler->getRows());
     }
 
     public function testCopyAllWithReferenceStore(): void
     {
-        $sampler = new AllRows((object)['remember' => ['id' => 'fruit_ids']]);
-        $sampler->setTableName('fruits');
-        $sampler->setSourceConnection($this->sourceConnection);
-        $sampler->setDestConnection($this->destConnection);
         $referenceStore = new ReferenceStore();
-        $sampler->setReferenceStore($referenceStore);
+
+        $sampler = new AllRows(
+            (object)['remember' => ['id' => 'fruit_ids']],
+            $referenceStore,
+            $this->sourceConnection,
+            $this->destConnection
+        );
+        $sampler->setTableName('fruits');
 
         $sampler->execute();
 
         $this->assertCount(4, $referenceStore->getReferencesByName('fruit_ids'));
     }
 
-    private function generateMatched($config)
+    private function generateMatched($config): SamplerInterface
     {
-        $sampler = new MatchedRows($config);
+        $sampler = new MatchedRows(
+            $config,
+            new ReferenceStore(),
+            $this->sourceConnection,
+            $this->destConnection
+        );
         $sampler->setTableName('fruit_x_basket');
-        $sampler->setSourceConnection($this->sourceConnection);
-        $sampler->setDestConnection($this->destConnection);
         return $sampler;
     }
 

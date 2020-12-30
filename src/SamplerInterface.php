@@ -1,7 +1,6 @@
 <?php
-namespace Quidco\DbSampler;
 
-use Doctrine\DBAL\Connection;
+namespace Quidco\DbSampler;
 
 interface SamplerInterface
 {
@@ -38,33 +37,4 @@ interface SamplerInterface
      * @inheritdoc
      */
     public function execute();
-
-    /**
-     * Set the DBAL connection to sample data from
-     *
-     * @param Connection $sourceConnection DBAL connection
-     *
-     * @return void
-     * @inheritdoc
-     */
-    public function setSourceConnection(Connection $sourceConnection);
-
-    /**
-     * Set the DBAL connection to store data to
-     *
-     * @param Connection $destConnection DBAL connection
-     *
-     * @return void
-     * @inheritdoc
-     */
-    public function setDestConnection(Connection $destConnection);
-
-    /**
-     * Pass in a ReferenceStore to act as common memory
-     *
-     * @param ReferenceStore $referenceStore Storage
-     *
-     * @return mixed
-     */
-    public function setReferenceStore(ReferenceStore $referenceStore);
 }
