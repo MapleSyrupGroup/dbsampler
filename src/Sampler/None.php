@@ -9,7 +9,7 @@ use Quidco\DbSampler\BaseSampler;
  */
 class None extends BaseSampler implements Sampler
 {
-    public function getName()
+    public function getName(): string
     {
         return 'None';
     }

@@ -163,9 +163,9 @@ used directly in the cleanFields stanza by using `"name": "faker:GENERATOR"`, eg
 
 Extending the project
 ---------------------
-The tool is designed to be extended primarily by adding custom Samplers (which must implement `\Quidco\DbSampler\SamplerInterface`) 
-and cleaners (documented in `\Quidco\DbSampler\FieldCleanerProvider::getCleanerByName`).
-
-It is likely that a mechanism to register external cleaners and samplers will be provided.
+The tool is designed to be extended primarily by adding custom Samplers (which must implement `\Quidco\DbSampler\Sampler\Sampler`) 
+and cleaners (which must implement `\Quidco\DbSampler\Cleaner\FieldCleaner` ànd be registered with `\Quidco\DbSampler\Cleaner\RowCleaner::registerCleaner`).
 
 Currently, only mysql and sqlite databases are supported, but this could also be extended.
+
+This tool does not convert between database drivers. This means that if your source database is MySQL, then the destination database must also be MySQL.

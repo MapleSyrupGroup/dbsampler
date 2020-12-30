@@ -6,7 +6,7 @@ use Quidco\DbSampler\BaseSampler;
 
 class AllRows extends BaseSampler implements Sampler
 {
-    public function getName()
+    public function getName(): string
     {
         return 'All';
     }

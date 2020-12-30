@@ -6,7 +6,7 @@ use Quidco\DbSampler\ReferenceStore;
 use Quidco\DbSampler\Sampler\AllRows;
 use Quidco\DbSampler\Sampler\None;
 use Quidco\DbSampler\Sampler\MatchedRows;
-use Quidco\DbSampler\SamplerInterface;
+use Quidco\DbSampler\Sampler\Sampler;
 
 class SamplerTest extends SqliteBasedTestCase
 {
@@ -48,7 +48,7 @@ class SamplerTest extends SqliteBasedTestCase
         $this->assertCount(4, $referenceStore->getReferencesByName('fruit_ids'));
     }
 
-    private function generateMatched($config): SamplerInterface
+    private function generateMatched($config): Sampler
     {
         return new MatchedRows(
             $config,

@@ -1,4 +1,5 @@
 <?php
+
 namespace Quidco\DbSampler\Sampler;
 
 use Quidco\DbSampler\BaseSampler;
@@ -42,7 +43,7 @@ class MatchedRows extends BaseSampler implements Sampler
      * @return string
      * @inheritdoc
      */
-    public function getName()
+    public function getName(): string
     {
         return 'Matched';
     }

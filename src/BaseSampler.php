@@ -7,9 +7,9 @@ use Doctrine\DBAL\Connection;
 /**
  * Abstract BaseSampler class with some common functionality.
  *
- * Not for use as a type hint, use SamplerInterface for that
+ * Not for use as a type hint, use Sampler for that
  */
-abstract class BaseSampler implements SamplerInterface
+abstract class BaseSampler
 {
     /**
      * Table on which the sampler is operating

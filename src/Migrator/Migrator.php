@@ -9,7 +9,7 @@ use Quidco\DbSampler\Cleaner\RowCleaner;
 use Quidco\DbSampler\Collection\TableCollection;
 use Quidco\DbSampler\Collection\ViewCollection;
 use Quidco\DbSampler\ReferenceStore;
-use Quidco\DbSampler\SamplerInterface;
+use Quidco\DbSampler\Sampler\Sampler;
 use Quidco\DbSampler\SamplerMap\SamplerMap;
 use Quidco\DbSampler\Writer\Writer;
 
@@ -231,13 +231,12 @@ class Migrator
     }
 
     /**
-     * Build a SamplerInterface object from configuration
+     * Build a Sampler object from configuration
      *
      * @param \stdClass $migrationSpec
      * @param string $tableName
-     * @return SamplerInterface
      */
-    private function buildTableSampler(\stdClass $migrationSpec, string $tableName): SamplerInterface
+    private function buildTableSampler(\stdClass $migrationSpec, string $tableName): Sampler
     {
         $sampler = null;
 
