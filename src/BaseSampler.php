@@ -26,13 +26,6 @@ abstract class BaseSampler implements SamplerInterface
     protected $sourceConnection;
 
     /**
-     * Connection to Dest DB
-     *
-     * @var Connection
-     */
-    protected $destConnection;
-
-    /**
      * @var ReferenceStore
      */
     protected $referenceStore;
@@ -50,13 +43,6 @@ abstract class BaseSampler implements SamplerInterface
     protected $limit;
 
     /**
-     * Commands to run on the destination table after importing
-     *
-     * @var array
-     */
-    protected $postImportSql = [];
-
-    /**
      * @var \stdClass
      */
     protected $config;
@@ -65,8 +51,7 @@ abstract class BaseSampler implements SamplerInterface
     public function __construct(
         \stdClass $config,
         ReferenceStore $referenceStore,
-        Connection $sourceConnection,
-        Connection $destConnection
+        Connection $sourceConnection
     )
     {
         $this->config = $config;
@@ -74,9 +59,7 @@ abstract class BaseSampler implements SamplerInterface
 
         $this->referenceFields = isset($config->remember) ? $config->remember : [];
         $this->limit = isset($config->limit) ? (int)$config->limit : false;
-        $this->postImportSql = isset($config->postImportSql) ? $config->postImportSql : [];
         $this->sourceConnection = $sourceConnection;
-        $this->destConnection = $destConnection;
     }
 
     /**
@@ -96,10 +79,8 @@ abstract class BaseSampler implements SamplerInterface
     /**
      * Naïve implementation - grab all rows and insert
      *
-     * @return int Rows copied
-     * @throws \RuntimeException If dest connection not configured
      */
-    public function execute()
+    public function execute(): array
     {
         $rows = $this->getRows();
         $references = [];
@@ -121,16 +102,7 @@ abstract class BaseSampler implements SamplerInterface
             $this->referenceStore->setReferencesByName($reference, $values);
         }
 
-        foreach ($rows as $row) {
-            $this->sanitiseRowKeys($row);
-            $this->destConnection->insert($this->tableName, $row);
-        }
-
-        foreach ($this->postImportSql as $sql) {
-            $this->destConnection->exec($sql);
-        }
-
-        return count($rows);
+        return $rows;
     }
 
     /**
@@ -149,27 +121,5 @@ abstract class BaseSampler implements SamplerInterface
         }
 
         return $config->$key;
-    }
-
-    /**
-     * Issue: DBAL insert() does not check for reserved words being used as column names.
-     *
-     * So we have to clean the keys ourselves.
-     *
-     * *Very* special case initially as the general case is likely to be slow
-     *
-     * @param mixed[] $row Row to clean
-     *
-     * @return void
-     *
-     * @throws \RuntimeException If dest connection not configured
-     */
-    private function sanitiseRowKeys(&$row)
-    {
-        /** @noinspection ForeachOnArrayComponentsInspection */
-        foreach (array_keys($row) as $key) {
-            $row[$this->destConnection->quoteIdentifier($key)] = $row[$key];
-            unset($row[$key]);
-        }
     }
 }

@@ -15,8 +15,7 @@ class SamplerTest extends SqliteBasedTestCase
         $sampler = new None(
             (object)[],
             new ReferenceStore(),
-            $this->sourceConnection,
-            $this->destConnection
+            $this->sourceConnection
         );
         $this->assertSame([], $sampler->getRows());
     }
@@ -26,8 +25,7 @@ class SamplerTest extends SqliteBasedTestCase
         $sampler = new AllRows(
             (object)[],
             new ReferenceStore(),
-            $this->sourceConnection,
-            $this->destConnection
+            $this->sourceConnection
         );
         $sampler->setTableName('fruits');
         $this->assertCount(4, $sampler->getRows());
@@ -40,8 +38,7 @@ class SamplerTest extends SqliteBasedTestCase
         $sampler = new AllRows(
             (object)['remember' => ['id' => 'fruit_ids']],
             $referenceStore,
-            $this->sourceConnection,
-            $this->destConnection
+            $this->sourceConnection
         );
         $sampler->setTableName('fruits');
 
@@ -55,8 +52,7 @@ class SamplerTest extends SqliteBasedTestCase
         $sampler = new MatchedRows(
             $config,
             new ReferenceStore(),
-            $this->sourceConnection,
-            $this->destConnection
+            $this->sourceConnection
         );
         $sampler->setTableName('fruit_x_basket');
         return $sampler;

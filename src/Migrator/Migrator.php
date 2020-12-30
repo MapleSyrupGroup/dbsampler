@@ -9,6 +9,7 @@ use Quidco\DbSampler\Collection\ViewCollection;
 use Quidco\DbSampler\ReferenceStore;
 use Quidco\DbSampler\SamplerInterface;
 use Quidco\DbSampler\SamplerMap\SamplerMap;
+use Quidco\DbSampler\Writer\Writer;
 
 /**
  * Migrator class to handle all migrations in a set
@@ -40,7 +41,8 @@ class Migrator
         Connection $sourceConnection,
         Connection $destConnection,
         LoggerInterface $logger
-    ) {
+    )
+    {
         $this->sourceConnection = $sourceConnection;
         $this->destConnection = $destConnection;
         $this->logger = $logger;
@@ -54,14 +56,22 @@ class Migrator
      */
     public function execute(string $setName, TableCollection $tableCollection, ViewCollection $viewCollection): void
     {
+
         foreach ($tableCollection->getTables() as $table => $migrationSpec) {
+            // @todo: it'd probably be better to have a proper `migrationspec` config object
+            // rather than relying on properties being present in the json / stdClass object
+
             $sampler = $this->buildTableSampler($migrationSpec);
+            $writer = new Writer($migrationSpec, $this->destConnection);
 
             try {
                 $this->ensureEmptyTargetTable($table, $this->sourceConnection, $this->destConnection);
                 $sampler->setTableName($table);
                 $rows = $sampler->execute();
-                $this->logger->info("$setName: migrated '$table' with '" . $sampler->getName() . "': $rows rows");
+
+                $writer->write($table, $rows);
+
+                $this->logger->info("$setName: migrated '$table' with '" . $sampler->getName() . "': " . \count($rows) . " rows");
             } catch (\Exception $e) {
                 $this->logger->error(
                     "$setName: failed to migrate '$table' with '" . $sampler->getName() . "': " . $e->getMessage()
@@ -232,8 +242,7 @@ class Migrator
             $sampler = new $samplerClass(
                 $migrationSpec,
                 $this->referenceStore,
-                $this->sourceConnection,
-                $this->destConnection
+                $this->sourceConnection
             );
             if (!$sampler instanceof SamplerInterface) {
                 throw new \UnexpectedValueException('Invalid sampler created');
