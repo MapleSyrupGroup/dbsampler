@@ -30,16 +30,16 @@ class RowCleaner
 
         $cleanFields = \json_decode(\json_encode($this->migrationSpec->cleanFields), true);
 
-        $fieldCleanerProvider = new FieldCleanerProvider();
-
-        \array_walk($row, function (&$item, $key) use ($fieldCleanerProvider, $cleanFields) {
-            // @todo there are no tests that match this \array_key_exists condition!
+        \array_walk($row, function (&$item, $key) use ($cleanFields) {
             if (\array_key_exists($key, $cleanFields)) {
-                $item = $fieldCleanerProvider->getCleanerByDescription($cleanFields[$key])($item);
+                $cleanerConfig = CleanerConfig::fromString($cleanFields[$key]);
+
+                $cleaner = FieldCleanerFactory::getCleaner($cleanerConfig);
+
+                $item = $cleaner->clean($cleanerConfig->getParameters(), $item);
             }
         });
 
         return $row;
     }
 }
-

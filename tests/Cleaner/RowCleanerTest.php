@@ -1,0 +1,40 @@
+<?php
+
+namespace Quidco\DbSampler\Tests\Cleaner;
+
+use PHPUnit\Framework\TestCase;
+use Quidco\DbSampler\Cleaner\RowCleaner;
+
+class RowCleanerTest extends TestCase
+{
+    public function testARowWithoutCleanerConfigIsNotModified(): void
+    {
+        $cleaner = new RowCleaner((object)[], 'test-table');
+
+        $row = [
+            'id' => 12345,
+            'email_address' => 'test@example.com'
+        ];
+
+        $this->assertEquals($row, $cleaner->cleanRow($row));
+    }
+
+    public function testARowIsModified(): void
+    {
+        $cleaner = new RowCleaner((object)[
+            'cleanFields' => [
+                'email_address' => 'fakeemail'
+            ]
+        ], 'test-table');
+
+        $row = [
+            'id' => 12345,
+            'email_address' => 'test@example.com'
+        ];
+
+        $cleanedRow = $cleaner->cleanRow($row);
+
+        $this->assertEquals($row['id'], $cleanedRow['id']);
+        $this->assertNotEquals($row['email_address'], $cleanedRow['email_address']);
+    }
+}
