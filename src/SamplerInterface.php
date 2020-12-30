@@ -13,16 +13,6 @@ interface SamplerInterface
     public function getName();
 
     /**
-     * Specify which table this sampler operates on
-     *
-     * @param string $table Name of the table
-     *
-     * @return void
-     * @inheritdoc
-     */
-    public function setTableName($table);
-
-    /**
      * Return all rows that this sampler would copy
      *
      * @return array[]

@@ -135,7 +135,7 @@ assumed to be `*.sqlite` files in this directory
           }
         },
         "baskets": {
-          "sampler": "cleanMatched",        # some samplers support field cleaners that are defined in
+          "sampler": "matched",             # samplers support field cleaners that are defined in
                                             # \Quidco\DbSampler\FieldCleanerProvider::getCleanerByName
                                             # They modify or replace the content of the field that they are keyed to
           "constraints": {

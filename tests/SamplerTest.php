@@ -15,7 +15,8 @@ class SamplerTest extends SqliteBasedTestCase
         $sampler = new None(
             (object)[],
             new ReferenceStore(),
-            $this->sourceConnection
+            $this->sourceConnection,
+            'test_table_name'
         );
         $this->assertSame([], $sampler->getRows());
     }
@@ -25,9 +26,9 @@ class SamplerTest extends SqliteBasedTestCase
         $sampler = new AllRows(
             (object)[],
             new ReferenceStore(),
-            $this->sourceConnection
+            $this->sourceConnection,
+            'fruits'
         );
-        $sampler->setTableName('fruits');
         $this->assertCount(4, $sampler->getRows());
     }
 
@@ -38,9 +39,9 @@ class SamplerTest extends SqliteBasedTestCase
         $sampler = new AllRows(
             (object)['remember' => ['id' => 'fruit_ids']],
             $referenceStore,
-            $this->sourceConnection
+            $this->sourceConnection,
+            'fruits'
         );
-        $sampler->setTableName('fruits');
 
         $sampler->execute();
 
@@ -49,13 +50,12 @@ class SamplerTest extends SqliteBasedTestCase
 
     private function generateMatched($config): SamplerInterface
     {
-        $sampler = new MatchedRows(
+        return new MatchedRows(
             $config,
             new ReferenceStore(),
-            $this->sourceConnection
+            $this->sourceConnection,
+            'fruit_x_basket'
         );
-        $sampler->setTableName('fruit_x_basket');
-        return $sampler;
     }
 
     public function testMatchedWithWhereClause(): void

@@ -17,7 +17,9 @@ class AppSetupTest extends SqliteBasedTestCase
      */
     public function testSampleMigration(): void
     {
-        $config = MigrationConfigurationCollection::fromFilePaths([$this->fixturesDir . '/small_sqlite_migration.json']);
+        $config = MigrationConfigurationCollection::fromFilePaths([
+            $this->fixturesDir . '/small_sqlite_migration.json'
+        ]);
 
         $app = new App($config);
         $this->assertInstanceOf(App::class, $app);
@@ -41,7 +43,9 @@ class AppSetupTest extends SqliteBasedTestCase
      */
     public function testSqliteCredentialMissingDirectoryHandling(): void
     {
-        $config = MigrationConfigurationCollection::fromFilePaths([$this->fixturesDir . '/small_sqlite_migration.json']);
+        $config = MigrationConfigurationCollection::fromFilePaths([
+            $this->fixturesDir . '/small_sqlite_migration.json'
+        ]);
 
         $app = new App($config);
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-no-dir.json');
@@ -55,7 +59,9 @@ class AppSetupTest extends SqliteBasedTestCase
      */
     public function testSqliteCredentialRelativeDirectoryHandling(): void
     {
-        $config = MigrationConfigurationCollection::fromFilePaths([$this->fixturesDir . '/small_sqlite_migration.json']);
+        $config = MigrationConfigurationCollection::fromFilePaths([
+            $this->fixturesDir . '/small_sqlite_migration.json'
+        ]);
 
         $app = new App($config);
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-relative-dir.json');
@@ -74,7 +80,9 @@ class AppSetupTest extends SqliteBasedTestCase
      */
     public function testSqliteCredentialSourceDestDirectoryHandling(): void
     {
-        $config = MigrationConfigurationCollection::fromFilePaths([$this->fixturesDir . '/small_sqlite_migration.json']);
+        $config = MigrationConfigurationCollection::fromFilePaths([
+            $this->fixturesDir . '/small_sqlite_migration.json'
+        ]);
 
         $app = new App($config);
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-source-dest.json');

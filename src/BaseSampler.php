@@ -51,7 +51,8 @@ abstract class BaseSampler implements SamplerInterface
     public function __construct(
         \stdClass $config,
         ReferenceStore $referenceStore,
-        Connection $sourceConnection
+        Connection $sourceConnection,
+        string $tableName
     )
     {
         $this->config = $config;
@@ -60,20 +61,7 @@ abstract class BaseSampler implements SamplerInterface
         $this->referenceFields = isset($config->remember) ? $config->remember : [];
         $this->limit = isset($config->limit) ? (int)$config->limit : false;
         $this->sourceConnection = $sourceConnection;
-    }
-
-    /**
-     * Set table name
-     *
-     * @param string $tableName Name of table to operate on
-     *
-     * @return BaseSampler
-     */
-    public function setTableName($tableName)
-    {
         $this->tableName = $tableName;
-
-        return $this;
     }
 
     /**

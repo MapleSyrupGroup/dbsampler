@@ -4,6 +4,8 @@ namespace Quidco\DbSampler\Migrator;
 
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
+use Quidco\DbSampler\Cleaner\CleanerFactory;
+use Quidco\DbSampler\Cleaner\RowCleaner;
 use Quidco\DbSampler\Collection\TableCollection;
 use Quidco\DbSampler\Collection\ViewCollection;
 use Quidco\DbSampler\ReferenceStore;
@@ -61,16 +63,16 @@ class Migrator
             // @todo: it'd probably be better to have a proper `migrationspec` config object
             // rather than relying on properties being present in the json / stdClass object
 
-            $sampler = $this->buildTableSampler($migrationSpec);
+            $sampler = $this->buildTableSampler($migrationSpec, $table);
             $writer = new Writer($migrationSpec, $this->destConnection);
+            $cleaner = new RowCleaner($migrationSpec, $table);
 
             try {
                 $this->ensureEmptyTargetTable($table, $this->sourceConnection, $this->destConnection);
-                $sampler->setTableName($table);
                 $rows = $sampler->execute();
 
                 foreach ($rows as $row) {
-                    $writer->write($table, $row);
+                    $writer->write($table, $cleaner->cleanRow($row));
                 }
                 $writer->postWrite();
 
@@ -231,10 +233,11 @@ class Migrator
     /**
      * Build a SamplerInterface object from configuration
      *
-     * @throws \UnexpectedValueException If bad object created - should be impossible
-     * @throws \RuntimeException On invalid specification
+     * @param \stdClass $migrationSpec
+     * @param string $tableName
+     * @return SamplerInterface
      */
-    private function buildTableSampler(\stdClass $migrationSpec): SamplerInterface
+    private function buildTableSampler(\stdClass $migrationSpec, string $tableName): SamplerInterface
     {
         $sampler = null;
 
@@ -245,11 +248,9 @@ class Migrator
             $sampler = new $samplerClass(
                 $migrationSpec,
                 $this->referenceStore,
-                $this->sourceConnection
+                $this->sourceConnection,
+                $tableName
             );
-            if (!$sampler instanceof SamplerInterface) {
-                throw new \UnexpectedValueException('Invalid sampler created');
-            }
         } else {
             throw new \RuntimeException("Unrecognised sampler type '$samplerType' required");
         }
