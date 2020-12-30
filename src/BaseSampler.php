@@ -53,8 +53,7 @@ abstract class BaseSampler
         ReferenceStore $referenceStore,
         Connection $sourceConnection,
         string $tableName
-    )
-    {
+    ) {
         $this->config = $config;
         $this->referenceStore = $referenceStore;
 

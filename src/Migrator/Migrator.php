@@ -4,7 +4,6 @@ namespace Quidco\DbSampler\Migrator;
 
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
-use Quidco\DbSampler\Cleaner\CleanerFactory;
 use Quidco\DbSampler\Cleaner\RowCleaner;
 use Quidco\DbSampler\Collection\TableCollection;
 use Quidco\DbSampler\Collection\ViewCollection;
@@ -43,8 +42,7 @@ class Migrator
         Connection $sourceConnection,
         Connection $destConnection,
         LoggerInterface $logger
-    )
-    {
+    ) {
         $this->sourceConnection = $sourceConnection;
         $this->destConnection = $destConnection;
         $this->logger = $logger;
@@ -58,7 +56,6 @@ class Migrator
      */
     public function execute(string $setName, TableCollection $tableCollection, ViewCollection $viewCollection): void
     {
-
         foreach ($tableCollection->getTables() as $table => $migrationSpec) {
             // @todo: it'd probably be better to have a proper `migrationspec` config object
             // rather than relying on properties being present in the json / stdClass object

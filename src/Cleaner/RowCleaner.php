@@ -2,8 +2,6 @@
 
 namespace Quidco\DbSampler\Cleaner;
 
-use Quidco\DbSampler\FieldCleanerProvider;
-
 class RowCleaner
 {
     /**

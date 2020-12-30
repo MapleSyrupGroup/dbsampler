@@ -3,7 +3,6 @@
 
 namespace Quidco\DbSampler\Cleaner\FieldCleaner;
 
-
 use Faker\Generator;
 use Quidco\DbSampler\Cleaner\FieldCleaner;
 
