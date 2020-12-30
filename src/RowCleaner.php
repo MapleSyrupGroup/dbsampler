@@ -18,7 +18,7 @@ class RowCleaner
      *
      * @param \callable[] $fieldCallbackMap Associative map of field => callback
      */
-    public function __construct($fieldCallbackMap)
+    private function __construct($fieldCallbackMap)
     {
         $this->fieldCallbackMap = $fieldCallbackMap;
     }

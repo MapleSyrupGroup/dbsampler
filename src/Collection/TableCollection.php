@@ -12,17 +12,12 @@ class TableCollection
     private $tables = [];
 
     /**
-     * @var ReferenceStore
-     */
-    private $referenceStore;
-    /**
      * @var array
      */
     private $rawTables;
 
     private function __construct(array $rawTables)
     {
-        $this->referenceStore = new ReferenceStore();
         $this->rawTables = $rawTables;
     }
 
@@ -31,12 +26,12 @@ class TableCollection
         return new self((array)$configuration->getTables());
     }
 
-    public function getTables(): array
+    public function getTables(ReferenceStore $referenceStore): array
     {
         // @todo we probably shouldn't be building the sampler in this getter. find another place to do it!
         if ([] === $this->tables) {
             foreach ($this->rawTables as $table => $migrationSpec) {
-                $this->tables[$table] = $this->buildTableSampler($migrationSpec);
+                $this->tables[$table] = $this->buildTableSampler($migrationSpec, $referenceStore);
             }
         }
 
@@ -49,7 +44,7 @@ class TableCollection
      * @throws \UnexpectedValueException If bad object created - should be impossible
      * @throws \RuntimeException On invalid specification
      */
-    private function buildTableSampler(\stdClass $migrationSpec): SamplerInterface
+    private function buildTableSampler(\stdClass $migrationSpec, ReferenceStore $referenceStore): SamplerInterface
     {
         $sampler = null;
 
@@ -63,7 +58,7 @@ class TableCollection
             }
             /** @var SamplerInterface $sampler */
             $sampler->loadConfig($migrationSpec);
-            $sampler->setReferenceStore($this->referenceStore);
+            $sampler->setReferenceStore($referenceStore);
         } else {
             throw new \RuntimeException("Unrecognised sampler type '$samplerType' required");
         }

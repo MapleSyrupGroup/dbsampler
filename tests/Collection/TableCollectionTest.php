@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use Quidco\DbSampler\Configuration\MigrationConfiguration;
 use Quidco\DbSampler\Sampler\Matched;
 use Quidco\DbSampler\Sampler\NewestById;
+use Quidco\DbSampler\ReferenceStore;
 
 class TableCollectionTest extends TestCase
 {
@@ -27,7 +28,7 @@ class TableCollectionTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Unrecognised sampler type \'invalidsampler\' required');
-        $tableCollection->getTables();
+        $tableCollection->getTables(new ReferenceStore());
     }
 
     public function testItCreatesTheCorrectSamplerConfig(): void
@@ -61,7 +62,7 @@ class TableCollectionTest extends TestCase
 
         $tableCollection = TableCollection::fromConfig($config);
 
-        $this->assertInstanceOf(Matched::class, $tableCollection->getTables()['fruits']);
-        $this->assertInstanceOf(NewestById::class, $tableCollection->getTables()['vegetables']);
+        $this->assertInstanceOf(Matched::class, $tableCollection->getTables(new ReferenceStore())['fruits']);
+        $this->assertInstanceOf(NewestById::class, $tableCollection->getTables(new ReferenceStore())['vegetables']);
     }
 }

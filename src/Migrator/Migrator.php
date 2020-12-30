@@ -6,6 +6,7 @@ use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
 use Quidco\DbSampler\Collection\TableCollection;
 use Quidco\DbSampler\Collection\ViewCollection;
+use Quidco\DbSampler\ReferenceStore;
 
 /**
  * Migrator class to handle all migrations in a set
@@ -27,15 +28,22 @@ class Migrator
      */
     private $destConnection;
 
+    /**
+     * @var ReferenceStore
+     */
+    private $referenceStore;
+
 
     public function __construct(
         Connection $sourceConnection,
         Connection $destConnection,
         LoggerInterface $logger
-    ) {
+    )
+    {
         $this->sourceConnection = $sourceConnection;
         $this->destConnection = $destConnection;
         $this->logger = $logger;
+        $this->referenceStore = new ReferenceStore();
     }
 
     /**
@@ -45,7 +53,7 @@ class Migrator
      */
     public function execute(string $setName, TableCollection $tableCollection, ViewCollection $viewCollection): void
     {
-        foreach ($tableCollection->getTables() as $table => $sampler) {
+        foreach ($tableCollection->getTables($this->referenceStore) as $table => $sampler) {
             try {
                 $this->ensureEmptyTargetTable($table, $this->sourceConnection, $this->destConnection);
                 $sampler->setTableName($table);
@@ -109,7 +117,7 @@ class Migrator
      */
     private function migrateTableTriggers(string $setName, TableCollection $tableCollection): void
     {
-        foreach ($tableCollection->getTables() as $table => $sampler) {
+        foreach ($tableCollection->getTables($this->referenceStore) as $table => $sampler) {
             try {
                 $triggerSql = $this->generateTableTriggerSql($table, $this->sourceConnection);
                 foreach ($triggerSql as $sql) {

@@ -56,16 +56,6 @@ abstract class BaseSampler implements SamplerInterface
     protected $postImportSql = [];
 
     /**
-     * Table name
-     *
-     * @return string
-     */
-    public function getTableName()
-    {
-        return $this->tableName;
-    }
-
-    /**
      * Set table name
      *
      * @param string $tableName Name of table to operate on
@@ -80,16 +70,6 @@ abstract class BaseSampler implements SamplerInterface
     }
 
     /**
-     * Get connection to source DB
-     *
-     * @return Connection
-     */
-    public function getSourceConnection()
-    {
-        return $this->sourceConnection;
-    }
-
-    /**
      * Set connection to source DB
      *
      * @param Connection $sourceConnection Source connection
@@ -101,16 +81,6 @@ abstract class BaseSampler implements SamplerInterface
         $this->sourceConnection = $sourceConnection;
 
         return $this;
-    }
-
-    /**
-     * Get connection to dest DB
-     *
-     * @return Connection
-     */
-    public function getDestConnection()
-    {
-        return $this->destConnection;
     }
 
     /**
