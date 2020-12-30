@@ -1,4 +1,5 @@
 <?php
+
 namespace Quidco\DbSampler\Sampler;
 
 use Quidco\DbSampler\RowCleaner;
@@ -17,10 +18,8 @@ class CleanMatchedRows extends MatchedRows
 
     /**
      * Return cleaned rows
-     *
-     * @return \array[]
      */
-    public function getRows()
+    public function getRows(): array
     {
         if (!isset($this->config->cleanFields)) {
             throw new \RuntimeException("cleanFields missing for {$this->config->sampler}");

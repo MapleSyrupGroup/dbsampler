@@ -26,13 +26,14 @@ class Writer
         $this->postImportSql = isset($config->postImportSql) ? $config->postImportSql : [];
     }
 
-    public function write(string $tableName, array $rows): void
+    public function write(string $tableName, $row): void
     {
-        foreach ($rows as $row) {
-            $this->sanitiseRowKeys($row);
-            $this->destination->insert($tableName, $row);
-        }
+        $this->sanitiseRowKeys($row);
+        $this->destination->insert($tableName, $row);
+    }
 
+    public function postWrite(): void
+    {
         foreach ($this->postImportSql as $sql) {
             $this->destination->exec($sql);
         }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Quidco\DbSampler\Sampler;
 
 use Quidco\DbSampler\BaseSampler;
@@ -10,7 +11,7 @@ class AllRows extends BaseSampler implements Sampler
         return 'All';
     }
 
-    public function getRows()
+    public function getRows(): array
     {
         $query = $this->sourceConnection->createQueryBuilder()->select('*')->from($this->tableName);
 

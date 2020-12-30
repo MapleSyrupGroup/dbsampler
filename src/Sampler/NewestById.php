@@ -31,10 +31,9 @@ class NewestById extends BaseSampler implements Sampler
     /**
      * Return all rows that this sampler would copy
      *
-     * @return array[]
      * @inheritdoc
      */
-    public function getRows()
+    public function getRows(): array
     {
         $this->quantity = (int)$this->demandParameterValue($this->config, 'quantity'); // TODO possibly rename to 'limit'
         $this->idField = $this->demandParameterValue($this->config, 'idField');

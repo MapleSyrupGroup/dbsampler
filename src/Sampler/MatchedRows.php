@@ -50,10 +50,9 @@ class MatchedRows extends BaseSampler implements Sampler
     /**
      * Return all rows that this sampler would copy
      *
-     * @return array[]
      * @inheritdoc
      */
-    public function getRows()
+    public function getRows(): array
     {
         $this->where = $this->config->where ?? [];
         if ($this->where) {

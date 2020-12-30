@@ -69,7 +69,10 @@ class Migrator
                 $sampler->setTableName($table);
                 $rows = $sampler->execute();
 
-                $writer->write($table, $rows);
+                foreach ($rows as $row) {
+                    $writer->write($table, $row);
+                }
+                $writer->postWrite();
 
                 $this->logger->info("$setName: migrated '$table' with '" . $sampler->getName() . "': " . \count($rows) . " rows");
             } catch (\Exception $e) {
