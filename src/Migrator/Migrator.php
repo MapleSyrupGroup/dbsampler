@@ -7,6 +7,8 @@ use Psr\Log\LoggerInterface;
 use Quidco\DbSampler\Collection\TableCollection;
 use Quidco\DbSampler\Collection\ViewCollection;
 use Quidco\DbSampler\ReferenceStore;
+use Quidco\DbSampler\SamplerInterface;
+use Quidco\DbSampler\SamplerMap\SamplerMap;
 
 /**
  * Migrator class to handle all migrations in a set
@@ -38,8 +40,8 @@ class Migrator
         Connection $sourceConnection,
         Connection $destConnection,
         LoggerInterface $logger
-    )
-    {
+    ) {
+    
         $this->sourceConnection = $sourceConnection;
         $this->destConnection = $destConnection;
         $this->logger = $logger;
@@ -53,7 +55,9 @@ class Migrator
      */
     public function execute(string $setName, TableCollection $tableCollection, ViewCollection $viewCollection): void
     {
-        foreach ($tableCollection->getTables($this->referenceStore) as $table => $sampler) {
+        foreach ($tableCollection->getTables() as $table => $migrationSpec) {
+            $sampler = $this->buildTableSampler($migrationSpec);
+
             try {
                 $this->ensureEmptyTargetTable($table, $this->sourceConnection, $this->destConnection);
                 $sampler->setTableName($table);
@@ -212,5 +216,34 @@ class Migrator
         $destConnection->exec($createSql);
 
         $this->logger->info("$setName: migrated view '$view'");
+    }
+
+
+    /**
+     * Build a SamplerInterface object from configuration
+     *
+     * @throws \UnexpectedValueException If bad object created - should be impossible
+     * @throws \RuntimeException On invalid specification
+     */
+    private function buildTableSampler(\stdClass $migrationSpec): SamplerInterface
+    {
+        $sampler = null;
+
+        // @todo: $migrationSpec should be an object with a getSampler() method
+        $samplerType = strtolower($migrationSpec->sampler);
+        if (array_key_exists($samplerType, SamplerMap::MAP)) {
+            $samplerClass = SamplerMap::MAP[$samplerType];
+            $sampler = new $samplerClass;
+            if (!$sampler instanceof SamplerInterface) {
+                throw new \UnexpectedValueException('Invalid sampler created');
+            }
+            /** @var SamplerInterface $sampler */
+            $sampler->loadConfig($migrationSpec);
+            $sampler->setReferenceStore($this->referenceStore);
+        } else {
+            throw new \RuntimeException("Unrecognised sampler type '$samplerType' required");
+        }
+
+        return $sampler;
     }
 }

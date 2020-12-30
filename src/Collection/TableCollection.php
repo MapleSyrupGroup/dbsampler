@@ -3,66 +3,27 @@
 namespace Quidco\DbSampler\Collection;
 
 use Quidco\DbSampler\Configuration\MigrationConfiguration;
-use Quidco\DbSampler\ReferenceStore;
-use Quidco\DbSampler\SamplerInterface;
-use Quidco\DbSampler\SamplerMap\SamplerMap;
 
 class TableCollection
 {
     private $tables = [];
 
-    /**
-     * @var array
-     */
-    private $rawTables;
-
-    private function __construct(array $rawTables)
+    private function __construct(array $tables)
     {
-        $this->rawTables = $rawTables;
+        $this->tables = $tables;
     }
 
     public static function fromConfig(MigrationConfiguration $configuration): self
     {
+        if ([] === $configuration->getTables()) {
+            throw new \RuntimeException('No table config was defined');
+        }
+
         return new self((array)$configuration->getTables());
     }
 
-    public function getTables(ReferenceStore $referenceStore): array
+    public function getTables(): array
     {
-        // @todo we probably shouldn't be building the sampler in this getter. find another place to do it!
-        if ([] === $this->tables) {
-            foreach ($this->rawTables as $table => $migrationSpec) {
-                $this->tables[$table] = $this->buildTableSampler($migrationSpec, $referenceStore);
-            }
-        }
-
         return $this->tables;
-    }
-
-    /**
-     * Build a SamplerInterface object from configuration
-     *
-     * @throws \UnexpectedValueException If bad object created - should be impossible
-     * @throws \RuntimeException On invalid specification
-     */
-    private function buildTableSampler(\stdClass $migrationSpec, ReferenceStore $referenceStore): SamplerInterface
-    {
-        $sampler = null;
-
-        // @todo: $migrationSpec should be an object with a getSampler() method
-        $samplerType = strtolower($migrationSpec->sampler);
-        if (array_key_exists($samplerType, SamplerMap::MAP)) {
-            $samplerClass = SamplerMap::MAP[$samplerType];
-            $sampler = new $samplerClass;
-            if (!$sampler instanceof SamplerInterface) {
-                throw new \UnexpectedValueException('Invalid sampler created');
-            }
-            /** @var SamplerInterface $sampler */
-            $sampler->loadConfig($migrationSpec);
-            $sampler->setReferenceStore($referenceStore);
-        } else {
-            throw new \RuntimeException("Unrecognised sampler type '$samplerType' required");
-        }
-
-        return $sampler;
     }
 }
