@@ -3,7 +3,7 @@ namespace Quidco\DbSampler\Sampler;
 
 use Quidco\DbSampler\BaseSampler;
 
-class NewestById extends BaseSampler
+class NewestById extends BaseSampler implements Sampler
 {
 
     /**
@@ -27,20 +27,6 @@ class NewestById extends BaseSampler
         return 'NewestById';
     }
 
-    /**
-     * Accept configuration as provided in a .db.json file
-     *
-     * @param \stdClass $config Configuration stanza, decoded to object
-     *
-     * @return void
-     * @inheritdoc
-     */
-    public function loadConfig($config)
-    {
-        parent::loadConfig($config);
-        $this->quantity = (int)$this->demandParameterValue($config, 'quantity'); // TODO possibly rename to 'limit'
-        $this->idField = $this->demandParameterValue($config, 'idField');
-    }
 
     /**
      * Return all rows that this sampler would copy
@@ -50,6 +36,9 @@ class NewestById extends BaseSampler
      */
     public function getRows()
     {
+        $this->quantity = (int)$this->demandParameterValue($this->config, 'quantity'); // TODO possibly rename to 'limit'
+        $this->idField = $this->demandParameterValue($this->config, 'idField');
+
         $query = $this->sourceConnection->createQueryBuilder()->select('*')->from($this->tableName)
             ->addOrderBy($this->idField, 'DESC')
             ->setMaxResults($this->quantity)

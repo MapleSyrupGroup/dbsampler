@@ -1,4 +1,5 @@
 <?php
+
 namespace Quidco\DbSampler\Sampler;
 
 use Quidco\DbSampler\BaseSampler;
@@ -25,37 +26,15 @@ class CleanAll extends BaseSampler
     }
 
     /**
-     * Accept configuration as provided in a .db.json file
-     *
-     * @param \stdClass $config Configuration stanza, decoded to object
-     *
-     * @return void
-     * @throws \RuntimeException If invalid cleaner specified
-     * @inheritdoc
-     *
-     * eg
-     * "qco_networks": {
-     * "sampler": "cleanAll",
-     * "cleanFields": {
-     * "contact": "fakeFullName",
-     * "email": "fakeEmail"
-     * }
-     * },
-     */
-    public function loadConfig($config)
-    {
-        $cleanSpec = (array)$config->cleanFields;
-        $this->rowCleaner = RowCleaner::createFromSpecification($cleanSpec);
-    }
-
-    /**
      * Return all rows that this sampler would copy
      *
-     * @return array[]
      * @inheritdoc
      */
-    public function getRows()
+    public function getRows(): array
     {
+        $cleanSpec = (array)$this->config->cleanFields;
+        $this->rowCleaner = RowCleaner::createFromSpecification($cleanSpec);
+
         $query = $this->sourceConnection->createQueryBuilder()->select('*')->from($this->tableName);
 
         if ($this->limit) {

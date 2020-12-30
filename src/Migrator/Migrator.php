@@ -233,12 +233,11 @@ class Migrator
         $samplerType = strtolower($migrationSpec->sampler);
         if (array_key_exists($samplerType, SamplerMap::MAP)) {
             $samplerClass = SamplerMap::MAP[$samplerType];
-            $sampler = new $samplerClass;
+            $sampler = new $samplerClass($migrationSpec);
             if (!$sampler instanceof SamplerInterface) {
                 throw new \UnexpectedValueException('Invalid sampler created');
             }
             /** @var SamplerInterface $sampler */
-            $sampler->loadConfig($migrationSpec);
             $sampler->setReferenceStore($this->referenceStore);
         } else {
             throw new \RuntimeException("Unrecognised sampler type '$samplerType' required");

@@ -1,4 +1,5 @@
 <?php
+
 namespace Quidco\DbSampler;
 
 use Doctrine\DBAL\Connection;
@@ -54,6 +55,11 @@ abstract class BaseSampler implements SamplerInterface
      * @var array
      */
     protected $postImportSql = [];
+
+    /**
+     * @var \stdClass
+     */
+    protected $config;
 
     /**
      * Set table name
@@ -121,15 +127,10 @@ abstract class BaseSampler implements SamplerInterface
         return $this;
     }
 
-    /**
-     * Load config common to all child classes
-     *
-     * @param \stdClass $config Configuration from migration file
-     *
-     * @return void
-     */
-    public function loadConfig($config)
+    public function __construct(\stdClass $config)
     {
+        $this->config = $config;
+
         $this->referenceFields = isset($config->remember) ? $config->remember : [];
         $this->limit = isset($config->limit) ? (int)$config->limit : false;
         $this->postImportSql = isset($config->postImportSql) ? $config->postImportSql : [];
@@ -192,7 +193,7 @@ abstract class BaseSampler implements SamplerInterface
      * Convenience method to assert presence of a config key while fetching
      *
      * @param \stdClass $config Config block
-     * @param string    $key    Key to be found in block
+     * @param string $key Key to be found in block
      *
      * @return mixed
      * @throws \RuntimeException If required key missing

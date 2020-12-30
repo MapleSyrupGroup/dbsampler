@@ -23,7 +23,7 @@ use Quidco\DbSampler\BaseSampler;
  *     ]
  * }
  */
-class Matched extends BaseSampler
+class MatchedRows extends BaseSampler implements Sampler
 {
     /**
      * Assoc array of field => static value
@@ -48,25 +48,6 @@ class Matched extends BaseSampler
     }
 
     /**
-     * Accept configuration as provided in a .db.json file
-     *
-     * @param \stdClass $config Configuration stanza, decoded to object
-     *
-     * @return void
-     * @inheritdoc
-     */
-    public function loadConfig($config)
-    {
-        parent::loadConfig($config);
-        $this->where = $config->where ?? [];
-        if ($this->where) {
-            $this->constraints = $config->constraints ?? [];
-        } else {
-            $this->constraints = (array)$this->demandParameterValue($config, 'constraints');
-        }
-    }
-
-    /**
      * Return all rows that this sampler would copy
      *
      * @return array[]
@@ -74,6 +55,13 @@ class Matched extends BaseSampler
      */
     public function getRows()
     {
+        $this->where = $this->config->where ?? [];
+        if ($this->where) {
+            $this->constraints = $this->config->constraints ?? [];
+        } else {
+            $this->constraints = (array)$this->demandParameterValue($this->config, 'constraints');
+        }
+
         $queryBuilder = $this->sourceConnection->createQueryBuilder()->select('*')->from($this->tableName);
         $queryBuilder->where('1');
 

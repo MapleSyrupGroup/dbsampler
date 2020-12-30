@@ -14,16 +14,6 @@ interface SamplerInterface
     public function getName();
 
     /**
-     * Accept configuration as provided in a .db.json file
-     *
-     * @param \stdClass $config Configuration stanza, decoded to object
-     *
-     * @return void
-     * @inheritdoc
-     */
-    public function loadConfig($config);
-
-    /**
      * Specify which table this sampler operates on
      *
      * @param string $table Name of the table

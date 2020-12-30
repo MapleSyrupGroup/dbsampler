@@ -4,20 +4,20 @@
 namespace Quidco\DbSampler\SamplerMap;
 
 use Quidco\DbSampler\Sampler\CleanAll;
-use Quidco\DbSampler\Sampler\CleanMatched;
-use Quidco\DbSampler\Sampler\CopyAll;
-use Quidco\DbSampler\Sampler\CopyEmpty;
-use Quidco\DbSampler\Sampler\Matched;
+use Quidco\DbSampler\Sampler\CleanMatchedRows;
+use Quidco\DbSampler\Sampler\AllRows;
+use Quidco\DbSampler\Sampler\None;
+use Quidco\DbSampler\Sampler\MatchedRows;
 use Quidco\DbSampler\Sampler\NewestById;
 
 class SamplerMap
 {
     public const MAP = [
-        'all' => CopyAll::class,
-        'empty' => CopyEmpty::class,
-        'matched' => Matched::class,
+        'all' => AllRows::class,
+        'none' => None::class,
+        'matched' => MatchedRows::class,
         'newestbyid' => NewestById::class,
         'cleanall' => CleanAll::class,
-        'cleanmatched' => CleanMatched::class,
+        'cleanmatched' => CleanMatchedRows::class,
     ];
 }

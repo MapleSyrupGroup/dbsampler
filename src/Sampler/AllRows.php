@@ -3,11 +3,11 @@ namespace Quidco\DbSampler\Sampler;
 
 use Quidco\DbSampler\BaseSampler;
 
-class CopyAll extends BaseSampler
+class AllRows extends BaseSampler implements Sampler
 {
     public function getName()
     {
-        return 'CopyAll';
+        return 'All';
     }
 
     public function getRows()
