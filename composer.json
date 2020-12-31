@@ -1,6 +1,6 @@
 {
-    "name": "nealio82/dbsampler",
-    "description": "Rule-based generation of fixture databases by sampling operational databases. Forked from maple-syrup-group/dbsampler",
+    "name": "maple-syrup-group/dbsampler",
+    "description": "Rule-based generation of fixture databases by sampling operational databases",
     "license": "MIT",
     "type": "project",
     "bin": ["bin/dbsampler"],

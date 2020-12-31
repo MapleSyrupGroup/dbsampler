@@ -19,7 +19,7 @@ class CleanerConfig
         $this->parameters = $parameters;
     }
 
-    public static function fromString(string $config)
+    public static function fromString(string $config): self
     {
         $parameters = explode(':', $config);
         $name = \strtolower(\array_shift($parameters));
