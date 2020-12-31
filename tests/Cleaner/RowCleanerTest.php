@@ -26,7 +26,7 @@ class RowCleanerTest extends TestCase
             'cleanFields' => [
                 'email_address' => 'fakeemail'
             ]
-        ], 'test-table');
+        ]);
 
         $row = [
             'id' => 12345,
@@ -45,7 +45,7 @@ class RowCleanerTest extends TestCase
             'cleanFields' => [
                 'email_address' => 'custom_cleaner'
             ]
-        ], 'test-table');
+        ]);
 
         $row = [
             'id' => 12345,
@@ -67,7 +67,7 @@ class RowCleanerTest extends TestCase
             'cleanFields' => [
                 'email_address' => 'fakeemail'
             ]
-        ], 'test-table');
+        ]);
 
         $row = [
             'id' => 12345,

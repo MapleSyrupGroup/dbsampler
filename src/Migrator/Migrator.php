@@ -4,6 +4,7 @@ namespace Quidco\DbSampler\Migrator;
 
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
+use Quidco\DbSampler\Cleaner\FieldCleaner;
 use Quidco\DbSampler\Cleaner\RowCleaner;
 use Quidco\DbSampler\Collection\TableCollection;
 use Quidco\DbSampler\Collection\ViewCollection;
@@ -37,6 +38,8 @@ class Migrator
      */
     private $referenceStore;
 
+    private $customCleaners = [];
+
 
     public function __construct(
         Connection $sourceConnection,
@@ -62,7 +65,11 @@ class Migrator
 
             $sampler = $this->buildTableSampler($migrationSpec, $table);
             $writer = new Writer($migrationSpec, $this->destConnection);
-            $cleaner = new RowCleaner($migrationSpec, $table);
+            $cleaner = new RowCleaner($migrationSpec);
+
+            foreach ($this->customCleaners as $alias => $customCleaner) {
+                $cleaner->registerCleaner($customCleaner, $alias);
+            }
 
             try {
                 $this->ensureEmptyTargetTable($table, $this->sourceConnection, $this->destConnection);
@@ -89,6 +96,10 @@ class Migrator
         $this->migrateTableTriggers($setName, $tableCollection);
     }
 
+    public function registerCustomCleaner(FieldCleaner $cleaner, string $alias): void
+    {
+        $this->customCleaners[$alias] = $cleaner;
+    }
 
     /**
      * Ensure that the specified table is present in the destination DB as an empty copy of the source

@@ -9,17 +9,11 @@ class RowCleaner
      */
     private $migrationSpec;
 
-    /**
-     * @var string
-     */
-    private $tableName;
-
     private $customCleaners = [];
 
-    public function __construct(\stdClass $migrationSpec, string $tableName)
+    public function __construct(\stdClass $migrationSpec)
     {
         $this->migrationSpec = $migrationSpec;
-        $this->tableName = $tableName;
     }
 
     public function cleanRow(array $row): array
