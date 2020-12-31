@@ -30,7 +30,7 @@
       }
     },
     "baskets": {
-      "sampler": "cleanMatched",
+      "sampler": "matched",
       "constraints": {
         "id": "$basket_ids"
       },

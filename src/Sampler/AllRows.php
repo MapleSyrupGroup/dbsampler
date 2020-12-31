@@ -1,16 +1,17 @@
 <?php
+
 namespace Quidco\DbSampler\Sampler;
 
 use Quidco\DbSampler\BaseSampler;
 
-class CopyAll extends BaseSampler
+class AllRows extends BaseSampler implements Sampler
 {
-    public function getName()
+    public function getName(): string
     {
-        return 'CopyAll';
+        return 'All';
     }
 
-    public function getRows()
+    public function getRows(): array
     {
         $query = $this->sourceConnection->createQueryBuilder()->select('*')->from($this->tableName);
 

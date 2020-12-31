@@ -3,79 +3,88 @@
 namespace Quidco\DbSampler\Tests;
 
 use Quidco\DbSampler\ReferenceStore;
-use Quidco\DbSampler\Sampler\CopyAll;
-use Quidco\DbSampler\Sampler\CopyEmpty;
-use Quidco\DbSampler\Sampler\Matched;
+use Quidco\DbSampler\Sampler\AllRows;
+use Quidco\DbSampler\Sampler\None;
+use Quidco\DbSampler\Sampler\MatchedRows;
+use Quidco\DbSampler\Sampler\Sampler;
 
 class SamplerTest extends SqliteBasedTestCase
 {
-    public function testEmptySampler()
+    public function testEmptySampler(): void
     {
-        $sampler = new CopyEmpty();
+        $sampler = new None(
+            (object)[],
+            new ReferenceStore(),
+            $this->sourceConnection,
+            'test_table_name'
+        );
         $this->assertSame([], $sampler->getRows());
     }
 
-    public function testCopyAllSampler()
+    public function testCopyAllSampler(): void
     {
-        $sampler = new CopyAll();
-        $sampler->setTableName('fruits');
-        $sampler->setSourceConnection($this->sourceConnection);
+        $sampler = new AllRows(
+            (object)[],
+            new ReferenceStore(),
+            $this->sourceConnection,
+            'fruits'
+        );
         $this->assertCount(4, $sampler->getRows());
     }
 
-    public function testCopyAllWithReferenceStore()
+    public function testCopyAllWithReferenceStore(): void
     {
-        $sampler = new CopyAll();
-        $sampler->setTableName('fruits');
-        $sampler->setSourceConnection($this->sourceConnection);
-        $sampler->setDestConnection($this->destConnection);
         $referenceStore = new ReferenceStore();
-        $sampler->setReferenceStore($referenceStore);
-        $sampler->loadConfig((object)['remember' => ['id' => 'fruit_ids']]);
+
+        $sampler = new AllRows(
+            (object)['remember' => ['id' => 'fruit_ids']],
+            $referenceStore,
+            $this->sourceConnection,
+            'fruits'
+        );
+
         $sampler->execute();
 
         $this->assertCount(4, $referenceStore->getReferencesByName('fruit_ids'));
     }
 
-    private function generateMatched()
+    private function generateMatched($config): Sampler
     {
-        $sampler = new Matched();
-        $sampler->setTableName('fruit_x_basket');
-        $sampler->setSourceConnection($this->sourceConnection);
-        $sampler->setDestConnection($this->destConnection);
-        return $sampler;
+        return new MatchedRows(
+            $config,
+            new ReferenceStore(),
+            $this->sourceConnection,
+            'fruit_x_basket'
+        );
     }
 
-    public function testMatchedWithWhereClause()
+    public function testMatchedWithWhereClause(): void
     {
-        $sampler = $this->generateMatched();
         $config = [
             'constraints' => ['fruit_id' => 1],
             'where' => ['basket_id > 1']
         ];
-        $sampler->loadConfig((object)$config);
+        $sampler = $this->generateMatched((object)$config);
         $sampler->execute();
 
         $this->assertCount(2, $sampler->getRows());
     }
 
-    public function testMatchedWhereNoConstraints()
+    public function testMatchedWhereNoConstraints(): void
     {
-        $sampler = $this->generateMatched();
         $config = [
             'where' => ['basket_id > 1']
         ];
-        $sampler->loadConfig((object)$config);
+        $sampler = $this->generateMatched((object)$config);
         $sampler->execute();
     }
 
     /**
      * @expectedException \RuntimeException
      */
-    public function testMatchedNoConfigThrows()
+    public function testMatchedNoConfigThrows(): void
     {
-        $sampler = $this->generateMatched();
-        $sampler->loadConfig((object)[]);
+        $sampler = $this->generateMatched((object)[]);
         $sampler->execute();
     }
 }

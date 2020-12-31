@@ -135,9 +135,10 @@ assumed to be `*.sqlite` files in this directory
           }
         },
         "baskets": {
-          "sampler": "cleanMatched",        # some samplers support field cleaners that are defined in
-                                            # \Quidco\DbSampler\FieldCleanerProvider::getCleanerByName
+          "sampler": "matched",             # samplers support field cleaners that are listed in
+                                            # \Quidco\DbSampler\Cleaner\FieldCleanerFactory
                                             # They modify or replace the content of the field that they are keyed to
+                                            # You can register your own cleaners (see 'Extending the project' below)
           "constraints": {
             "id": "$basket_ids"
           },
@@ -163,9 +164,13 @@ used directly in the cleanFields stanza by using `"name": "faker:GENERATOR"`, eg
 
 Extending the project
 ---------------------
-The tool is designed to be extended primarily by adding custom Samplers (which must implement `\Quidco\DbSampler\SamplerInterface`) 
-and cleaners (documented in `\Quidco\DbSampler\FieldCleanerProvider::getCleanerByName`).
+The tool is designed to be extended primarily by adding custom Samplers (which must implement `\Quidco\DbSampler\Sampler\Sampler`) 
+and cleaners (which must implement `\Quidco\DbSampler\Cleaner\FieldCleaner` ànd be registered with `\Quidco\DbSampler\Cleaner\RowCleaner::registerCleaner`).
 
-It is likely that a mechanism to register external cleaners and samplers will be provided.
+Your custom cleaner will be provided with an array of parameters the cleaner was defined with (eg: `faker:ipv4`), and 
+the original database value.
 
 Currently, only mysql and sqlite databases are supported, but this could also be extended.
+
+This tool does not convert between database drivers. This means that if your source database is MySQL, then the 
+destination database must also be MySQL.

@@ -1,4 +1,5 @@
 <?php
+
 namespace Quidco\DbSampler\Sampler;
 
 use Quidco\DbSampler\BaseSampler;
@@ -6,19 +7,14 @@ use Quidco\DbSampler\BaseSampler;
 /**
  * Essentially a 'no-op' table sampler - allows tables to be specified as required without copying any data
  */
-class CopyEmpty extends BaseSampler
+class None extends BaseSampler implements Sampler
 {
-    public function getName()
+    public function getName(): string
     {
-        return 'CopyEmpty';
+        return 'None';
     }
 
-    public function loadConfig($config)
-    {
-        // none needed
-    }
-
-    public function getRows()
+    public function getRows(): array
     {
         return [];
     }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Quidco\DbSampler\Sampler;
 
 use Quidco\DbSampler\BaseSampler;
@@ -23,7 +24,7 @@ use Quidco\DbSampler\BaseSampler;
  *     ]
  * }
  */
-class Matched extends BaseSampler
+class MatchedRows extends BaseSampler implements Sampler
 {
     /**
      * Assoc array of field => static value
@@ -42,38 +43,25 @@ class Matched extends BaseSampler
      * @return string
      * @inheritdoc
      */
-    public function getName()
+    public function getName(): string
     {
         return 'Matched';
     }
 
     /**
-     * Accept configuration as provided in a .db.json file
-     *
-     * @param \stdClass $config Configuration stanza, decoded to object
-     *
-     * @return void
-     * @inheritdoc
-     */
-    public function loadConfig($config)
-    {
-        parent::loadConfig($config);
-        $this->where = $config->where ?? [];
-        if ($this->where) {
-            $this->constraints = $config->constraints ?? [];
-        } else {
-            $this->constraints = (array)$this->demandParameterValue($config, 'constraints');
-        }
-    }
-
-    /**
      * Return all rows that this sampler would copy
      *
-     * @return array[]
      * @inheritdoc
      */
-    public function getRows()
+    public function getRows(): array
     {
+        $this->where = $this->config->where ?? [];
+        if ($this->where) {
+            $this->constraints = $this->config->constraints ?? [];
+        } else {
+            $this->constraints = (array)$this->demandParameterValue($this->config, 'constraints');
+        }
+
         $queryBuilder = $this->sourceConnection->createQueryBuilder()->select('*')->from($this->tableName);
         $queryBuilder->where('1');
 
