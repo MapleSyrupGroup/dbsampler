@@ -18,7 +18,7 @@ class RowCleaner
 
     public function cleanRow(array $row): array
     {
-        if (!$this->migrationSpec->cleanFields) {
+        if (!isset($this->migrationSpec->cleanFields)) {
             return $row;
         }
 
