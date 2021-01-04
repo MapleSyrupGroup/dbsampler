@@ -4,8 +4,9 @@ namespace Quidco\DbSampler\Tests;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use PHPUnit\Framework\TestCase;
 
-abstract class SqliteBasedTestCase extends \PHPUnit_Framework_TestCase
+abstract class SqliteBasedTestCase extends TestCase
 {
     /**
      * @var string
@@ -25,7 +26,7 @@ abstract class SqliteBasedTestCase extends \PHPUnit_Framework_TestCase
      *
      * @return void
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->fixturesDir = __DIR__ . '/fixtures';
         $sqliteConfig = ['driver' => 'pdo_sqlite', 'directory' => $this->fixturesDir . '/sqlite-dbs'];
@@ -44,7 +45,7 @@ abstract class SqliteBasedTestCase extends \PHPUnit_Framework_TestCase
      *
      * @return void
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
         parent::tearDown();
         unlink($this->fixturesDir . '/sqlite-credentials.json');
