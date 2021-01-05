@@ -6,7 +6,7 @@
     "bin": ["bin/dbsampler"],
     "require": {
         "doctrine/dbal": "^2.5",
-        "fzaninotto/faker": "^1.6",
+        "fakerphp/faker": "^1.13",
         "monolog/monolog": "^1.22",
         "pimple/pimple": "^3.0"
     },
