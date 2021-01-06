@@ -3,8 +3,9 @@
 namespace Quidco\DbSampler\Tests;
 
 use Quidco\DbSampler\ReferenceStore;
+use PHPUnit\Framework\TestCase;
 
-class ReferenceStoreTest extends \PHPUnit_Framework_TestCase
+class ReferenceStoreTest extends TestCase
 {
     public function testBasicFunctions()
     {

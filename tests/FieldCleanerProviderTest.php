@@ -3,15 +3,16 @@
 namespace Quidco\DbSampler\Tests;
 
 use Quidco\DbSampler\FieldCleanerProvider;
+use PHPUnit\Framework\TestCase;
 
-class FieldCleanerProviderTest extends \PHPUnit_Framework_TestCase
+class FieldCleanerProviderTest extends TestCase
 {
     /**
      * @var FieldCleanerProvider
      */
     private $fieldCleaner;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->fieldCleaner = new FieldCleanerProvider();
     }

@@ -46,13 +46,13 @@ class AppSetupTest extends SqliteBasedTestCase
      * Check that sqlite credential files handle missing directory field correctly
      *
      * @return void
-     * @expectedException \RuntimeException
      */
     public function testSqliteCredentialMissingDirectoryHandling()
     {
         $app = new App();
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-no-dir.json');
         $app->loadDatabaseConfigFile($this->fixturesDir . '/small_sqlite_migration.json');
+        $this->expectException(\RuntimeException::class);
         $app->createDestConnectionByDbName('small-sqlite-source'); // directory tested at connection time now
     }
 
