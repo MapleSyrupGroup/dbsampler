@@ -59,7 +59,6 @@ class AppSetupTest extends SqliteBasedTestCase
 
         $app = new App($config);
         $app->loadCredentialsFile($this->fixturesDir . '/sqlite-credentials-relative-dir.json');
-        $app->loadDatabaseConfigFile($this->fixturesDir . '/small_sqlite_migration.json');
         $app->createDestConnectionByDbName('small-sqlite-source');
         // resolution of dirs now happens later
 
