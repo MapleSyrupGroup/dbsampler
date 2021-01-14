@@ -21,11 +21,12 @@ class MigrationConfigurationCollection
 
         foreach ($filepaths as $migrationFilePath) {
             try {
+                $migrationFiles = [$migrationFilePath];
+
                 if (is_dir($migrationFilePath)) {
                     $migrationFiles = glob(rtrim($migrationFilePath, '/') . '/*.json');
-                } else {
-                    $migrationFiles = [$migrationFilePath];
                 }
+
                 foreach ($migrationFiles as $file) {
                     $config = MigrationConfiguration::fromJson(file_get_contents($file));
 

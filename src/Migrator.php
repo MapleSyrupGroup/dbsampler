@@ -120,7 +120,7 @@ class Migrator
                 }
             } catch (\Exception $e) {
                 $this->logger->error(
-                    "$setName: failed to migrate '$table' with '" . $sampler->getName() . "': " . $e->getMessage()
+                    "$setName: failed to migrate '$table' triggers with '" . $sampler->getName() . "': " . $e->getMessage()
                 );
                 throw $e;
             }
