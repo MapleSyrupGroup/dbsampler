@@ -1,12 +1,12 @@
 <?php
 
-namespace Quidco\DbSampler\Tests\Collection;
+namespace Quidco\DbSampler\Tests\DatabaseSchema;
 
 use PHPUnit\Framework\TestCase;
-use Quidco\DbSampler\Collection\ViewCollection;
+use Quidco\DbSampler\DatabaseSchema\ViewsList;
 use Quidco\DbSampler\Configuration\MigrationConfiguration;
 
-class ViewCollectionTest extends TestCase
+class ViewsListTest extends TestCase
 {
     public function testItReturnsTheListOfViews(): void
     {
@@ -20,9 +20,9 @@ class ViewCollectionTest extends TestCase
             'views' => $views
         ]));
 
-        $viewCollection = ViewCollection::fromConfig($config);
+        $viewsList = ViewsList::fromConfig($config);
 
-        $this->assertSame($views, $viewCollection->getViews());
+        $this->assertSame($views, $viewsList->getViews());
     }
 
     public function testViewsAreOptional(): void
@@ -38,8 +38,8 @@ class ViewCollectionTest extends TestCase
             ]
         ]));
 
-        $viewCollection = ViewCollection::fromConfig($config);
+        $viewsList = ViewsList::fromConfig($config);
 
-        $this->assertSame([], $viewCollection->getViews());
+        $this->assertSame([], $viewsList->getViews());
     }
 }

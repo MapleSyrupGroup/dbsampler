@@ -4,8 +4,8 @@ namespace Quidco\DbSampler;
 
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
-use Quidco\DbSampler\Collection\TableCollection;
-use Quidco\DbSampler\Collection\ViewCollection;
+use Quidco\DbSampler\DatabaseSchema\TablesList;
+use Quidco\DbSampler\DatabaseSchema\ViewsList;
 
 /**
  * Migrator class to handle all migrations in a set
@@ -43,7 +43,7 @@ class Migrator
      *
      * @throws \Exception Rethrows any exceptions after logging
      */
-    public function execute(string $setName, TableCollection $tableCollection, ViewCollection $viewCollection): void
+    public function execute(string $setName, TablesList $tableCollection, ViewsList $viewCollection): void
     {
         foreach ($tableCollection->getTables() as $table => $sampler) {
             try {
@@ -107,7 +107,7 @@ class Migrator
      * @throws \RuntimeException If DB type not supported
      * @throws \Doctrine\DBAL\DBALException If target trigger cannot be recreated
      */
-    private function migrateTableTriggers(string $setName, TableCollection $tableCollection): void
+    private function migrateTableTriggers(string $setName, TablesList $tableCollection): void
     {
         foreach ($tableCollection->getTables() as $table => $sampler) {
             try {

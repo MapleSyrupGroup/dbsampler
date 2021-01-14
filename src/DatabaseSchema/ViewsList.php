@@ -1,10 +1,10 @@
 <?php
 
-namespace Quidco\DbSampler\Collection;
+namespace Quidco\DbSampler\DatabaseSchema;
 
 use Quidco\DbSampler\Configuration\MigrationConfiguration;
 
-class ViewCollection
+class ViewsList
 {
     private $views = [];
 

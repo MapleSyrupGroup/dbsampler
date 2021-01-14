@@ -1,14 +1,14 @@
 <?php
 
-namespace Quidco\DbSampler\Tests\Collection;
+namespace Quidco\DbSampler\Tests\DatabaseSchema;
 
-use Quidco\DbSampler\Collection\TableCollection;
+use Quidco\DbSampler\DatabaseSchema\TablesList;
 use PHPUnit\Framework\TestCase;
 use Quidco\DbSampler\Configuration\MigrationConfiguration;
 use Quidco\DbSampler\Sampler\Matched;
 use Quidco\DbSampler\Sampler\NewestById;
 
-class TableCollectionTest extends TestCase
+class TablesListTest extends TestCase
 {
     public function testItThrowsAnExceptionWithAnUnknownSampler(): void
     {
@@ -23,11 +23,11 @@ class TableCollectionTest extends TestCase
             ]
         ]));
 
-        $tableCollection = TableCollection::fromConfig($config);
+        $tablesList = TablesList::fromConfig($config);
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Unrecognised sampler type \'invalidsampler\' required');
-        $tableCollection->getTables();
+        $tablesList->getTables();
     }
 
     public function testItCreatesTheCorrectSamplerConfig(): void
@@ -59,9 +59,9 @@ class TableCollectionTest extends TestCase
             ]
         ]));
 
-        $tableCollection = TableCollection::fromConfig($config);
+        $tablesList = TablesList::fromConfig($config);
 
-        $this->assertInstanceOf(Matched::class, $tableCollection->getTables()['fruits']);
-        $this->assertInstanceOf(NewestById::class, $tableCollection->getTables()['vegetables']);
+        $this->assertInstanceOf(Matched::class, $tablesList->getTables()['fruits']);
+        $this->assertInstanceOf(NewestById::class, $tablesList->getTables()['vegetables']);
     }
 }

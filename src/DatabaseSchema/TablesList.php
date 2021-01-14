@@ -1,13 +1,13 @@
 <?php
 
-namespace Quidco\DbSampler\Collection;
+namespace Quidco\DbSampler\DatabaseSchema;
 
 use Quidco\DbSampler\Configuration\MigrationConfiguration;
 use Quidco\DbSampler\ReferenceStore;
 use Quidco\DbSampler\SamplerInterface;
 use Quidco\DbSampler\SamplerMap;
 
-class TableCollection
+class TablesList
 {
     private $tables = [];
 

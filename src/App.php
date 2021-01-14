@@ -8,8 +8,8 @@ use Pimple\Container;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Quidco\DbSampler\Collection\TableCollection;
-use Quidco\DbSampler\Collection\ViewCollection;
+use Quidco\DbSampler\DatabaseSchema\TablesList;
+use Quidco\DbSampler\DatabaseSchema\ViewsList;
 use Quidco\DbSampler\Configuration\MigrationConfigurationCollection;
 
 /**
@@ -76,8 +76,8 @@ class App extends Container implements DatabaseConnectionFactoryInterface, Logge
 
         $migrator = new Migrator($sourceConnection, $destConnection, $this->getLogger());
 
-        $tableCollection = TableCollection::fromConfig($configuration);
-        $viewCollection = ViewCollection::fromConfig($configuration);
+        $tableCollection = TablesList::fromConfig($configuration);
+        $viewCollection = ViewsList::fromConfig($configuration);
 
         $migrator->execute($name, $tableCollection, $viewCollection);
     }
