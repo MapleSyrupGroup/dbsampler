@@ -11,7 +11,6 @@ use Psr\Log\NullLogger;
 use Quidco\DbSampler\Collection\TableCollection;
 use Quidco\DbSampler\Collection\ViewCollection;
 use Quidco\DbSampler\Configuration\MigrationConfigurationCollection;
-use Quidco\DbSampler\Migrator\Migrator;
 
 /**
  * Dependency container / app for DbSampler

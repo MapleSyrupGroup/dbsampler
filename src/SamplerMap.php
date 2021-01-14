@@ -1,7 +1,6 @@
 <?php
 
-
-namespace Quidco\DbSampler\SamplerMap;
+namespace Quidco\DbSampler;
 
 use Quidco\DbSampler\Sampler\CleanAll;
 use Quidco\DbSampler\Sampler\CleanMatched;

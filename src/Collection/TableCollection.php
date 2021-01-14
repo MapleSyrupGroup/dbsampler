@@ -5,7 +5,7 @@ namespace Quidco\DbSampler\Collection;
 use Quidco\DbSampler\Configuration\MigrationConfiguration;
 use Quidco\DbSampler\ReferenceStore;
 use Quidco\DbSampler\SamplerInterface;
-use Quidco\DbSampler\SamplerMap\SamplerMap;
+use Quidco\DbSampler\SamplerMap;
 
 class TableCollection
 {

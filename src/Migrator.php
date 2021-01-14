@@ -1,6 +1,6 @@
 <?php
 
-namespace Quidco\DbSampler\Migrator;
+namespace Quidco\DbSampler;
 
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
