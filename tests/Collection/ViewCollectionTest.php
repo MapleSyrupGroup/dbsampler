@@ -11,13 +11,13 @@ class ViewCollectionTest extends TestCase
     public function testItReturnsTheListOfViews(): void
     {
         $views = [
-            "fruit_basket",
-            "hamper"
+            'fruit_basket',
+            'hamper'
         ];
 
         $config = MigrationConfiguration::fromJson(\json_encode([
             'name' => 'test-migration',
-            "views" => $views
+            'views' => $views
         ]));
 
         $viewCollection = ViewCollection::fromConfig($config);
@@ -28,13 +28,13 @@ class ViewCollectionTest extends TestCase
     public function testViewsAreOptional(): void
     {
         $fruits = [
-            "sampler" => "matched",
+            'sampler' => 'matched',
         ];
 
         $config = MigrationConfiguration::fromJson(\json_encode([
             'name' => 'test-migration',
-            "tables" => [
-                "fruits" => $fruits,
+            'tables' => [
+                'fruits' => $fruits,
             ]
         ]));
 

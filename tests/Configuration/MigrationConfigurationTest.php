@@ -39,8 +39,8 @@ class MigrationConfigurationTest extends TestCase
 
         $config = MigrationConfiguration::fromJson(\json_encode([
             'name' => 'test-migration',
-            "sourceDb" => $sourceDb,
-            "destDb" => $destinationDb,
+            'sourceDb' => $sourceDb,
+            'destDb' => $destinationDb,
         ]));
 
         $this->assertSame($sourceDb, $config->getSourceDbName());
@@ -50,29 +50,29 @@ class MigrationConfigurationTest extends TestCase
     public function testTheTableConfigIsReturned(): void
     {
         $fruits = [
-            "sampler" => "matched",
-            "constraints" => [
-                "name" => [
-                    "apple",
-                    "pear"
+            'sampler' => 'matched',
+            'constraints' => [
+                'name' => [
+                    'apple',
+                    'pear'
                 ]
             ],
-            "remember" => [
-                "id" => "fruit_ids"
+            'remember' => [
+                'id' => 'fruit_ids'
             ]
         ];
 
         $vegetables = [
-            "sampler" => "NewestById",
-            "idField" => "id",
-            "quantity" => 2
+            'sampler' => 'NewestById',
+            'idField' => 'id',
+            'quantity' => 2
         ];
 
         $config = MigrationConfiguration::fromJson(\json_encode([
             'name' => 'test-migration',
-            "tables" => [
-                "fruits" => $fruits,
-                "vegetables" => $vegetables,
+            'tables' => [
+                'fruits' => $fruits,
+                'vegetables' => $vegetables,
             ]
         ]));
 
@@ -89,13 +89,13 @@ class MigrationConfigurationTest extends TestCase
     {
         $config = MigrationConfiguration::fromJson(\json_encode([
             'name' => 'test-migration',
-            "views" => [
-                "basket_contents"
+            'views' => [
+                'basket_contents'
             ]
         ]));
 
         $this->assertEquals(
-            ["basket_contents"],
+            ['basket_contents'],
             $config->getViews()
         );
     }

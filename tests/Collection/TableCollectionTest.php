@@ -13,13 +13,13 @@ class TableCollectionTest extends TestCase
     public function testItThrowsAnExceptionWithAnUnknownSampler(): void
     {
         $fruits = [
-            "sampler" => "invalidsampler",
+            'sampler' => 'invalidsampler',
         ];
 
         $config = MigrationConfiguration::fromJson(\json_encode([
             'name' => 'test-migration',
-            "tables" => [
-                "fruits" => $fruits
+            'tables' => [
+                'fruits' => $fruits
             ]
         ]));
 
@@ -33,29 +33,29 @@ class TableCollectionTest extends TestCase
     public function testItCreatesTheCorrectSamplerConfig(): void
     {
         $fruits = [
-            "sampler" => "matched",
-            "constraints" => [
-                "name" => [
-                    "apple",
-                    "pear"
+            'sampler' => 'matched',
+            'constraints' => [
+                'name' => [
+                    'apple',
+                    'pear'
                 ]
             ],
-            "remember" => [
-                "id" => "fruit_ids"
+            'remember' => [
+                'id' => 'fruit_ids'
             ]
         ];
 
         $vegetables = [
-            "sampler" => "NewestById",
-            "idField" => "id",
-            "quantity" => 2
+            'sampler' => 'NewestById',
+            'idField' => 'id',
+            'quantity' => 2
         ];
 
         $config = MigrationConfiguration::fromJson(\json_encode([
             'name' => 'test-migration',
-            "tables" => [
-                "fruits" => $fruits,
-                "vegetables" => $vegetables,
+            'tables' => [
+                'fruits' => $fruits,
+                'vegetables' => $vegetables,
             ]
         ]));
 
