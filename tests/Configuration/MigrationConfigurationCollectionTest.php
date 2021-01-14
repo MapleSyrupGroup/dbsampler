@@ -5,7 +5,7 @@ namespace Quidco\DbSampler\Tests\Configuration;
 use Quidco\DbSampler\Configuration\MigrationConfiguration;
 use PHPUnit\Framework\TestCase;
 
-class MigrationConfigurationTest extends TestCase
+class MigrationConfigurationCollectionTest extends TestCase
 {
     public function testANonValidJsonThrowsAnException(): void
     {
