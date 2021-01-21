@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Quidco\DbSampler\Configuration;
 
 class MigrationConfigurationCollection
