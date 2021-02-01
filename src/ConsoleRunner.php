@@ -5,6 +5,7 @@ use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
+use Quidco\DbSampler\Configuration\MigrationConfigurationCollection;
 
 /**
  * Console Runner for Quidco\DbSampler\App
@@ -88,7 +89,10 @@ class ConsoleRunner implements LoggerAwareInterface
             exit($exitCode);
         }
 
-        $app = new App();
+        $app = new App(
+            MigrationConfigurationCollection::fromFilePaths($this->migrationFilePaths)
+        );
+
         $app->setLogger($this->getLogger());
 
         try {
@@ -97,20 +101,6 @@ class ConsoleRunner implements LoggerAwareInterface
             print("Credentials file '{$this->credentialsFilePath}' is invalid " . $e->getMessage());
         }
 
-        foreach ($this->migrationFilePaths as $migrationFilePath) {
-            try {
-                if (is_dir($migrationFilePath)) {
-                    $migrationFiles = glob(rtrim($migrationFilePath, '/') . '/*.json');
-                } else {
-                    $migrationFiles = [$migrationFilePath];
-                }
-                foreach ($migrationFiles as $file) {
-                    $app->loadDatabaseConfigFile($file);
-                }
-            } catch (\RuntimeException $e) {
-                print("Migration file '$migrationFilePath' is invalid " . $e->getMessage());
-            }
-        }
 
         if (!$this->databases) {
             $this->databases = $app->getConfiguredMigrationNames();

@@ -9,13 +9,13 @@ use Quidco\DbSampler\Sampler\Matched;
 
 class SamplerTest extends SqliteBasedTestCase
 {
-    public function testEmptySampler()
+    public function testEmptySampler(): void
     {
         $sampler = new CopyEmpty();
         $this->assertSame([], $sampler->getRows());
     }
 
-    public function testCopyAllSampler()
+    public function testCopyAllSampler(): void
     {
         $sampler = new CopyAll();
         $sampler->setTableName('fruits');
@@ -23,7 +23,7 @@ class SamplerTest extends SqliteBasedTestCase
         $this->assertCount(4, $sampler->getRows());
     }
 
-    public function testCopyAllWithReferenceStore()
+    public function testCopyAllWithReferenceStore(): void
     {
         $sampler = new CopyAll();
         $sampler->setTableName('fruits');
@@ -46,7 +46,7 @@ class SamplerTest extends SqliteBasedTestCase
         return $sampler;
     }
 
-    public function testMatchedWithWhereClause()
+    public function testMatchedWithWhereClause(): void
     {
         $sampler = $this->generateMatched();
         $config = [
@@ -59,7 +59,7 @@ class SamplerTest extends SqliteBasedTestCase
         $this->assertCount(2, $sampler->getRows());
     }
 
-    public function testMatchedWhereNoConstraints()
+    public function testMatchedWhereNoConstraints(): void
     {
         $sampler = $this->generateMatched();
         $config = [
@@ -72,7 +72,7 @@ class SamplerTest extends SqliteBasedTestCase
 
     /**
      */
-    public function testMatchedNoConfigThrows()
+    public function testMatchedNoConfigThrows(): void
     {
         $sampler = $this->generateMatched();
         $this->expectException(\RuntimeException::class);

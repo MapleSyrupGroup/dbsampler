@@ -1,226 +1,80 @@
 <?php
+
 namespace Quidco\DbSampler;
 
 use Doctrine\DBAL\Connection;
-use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
+use Quidco\DbSampler\DatabaseSchema\TablesList;
+use Quidco\DbSampler\DatabaseSchema\ViewsList;
 
 /**
  * Migrator class to handle all migrations in a set
  */
-class Migrator implements LoggerAwareInterface
+class Migrator
 {
-    /**
-     * Name of migration set
-     *
-     * @var string
-     */
-    protected $migrationSetName;
-
-    /**
-     * Name of source DB
-     *
-     * @var string
-     */
-    protected $sourceDb;
-
-    /**
-     * Name of dest DB
-     *
-     * @var string
-     */
-    protected $destinationDb;
-
-    /**
-     * Table samplers
-     *
-     * @var SamplerInterface[]
-     */
-    protected $tableMigrations = [];
-
-    /**
-     * @var string[]
-     */
-    protected $viewsToMigrate = [];
-
-    /**
-     * Object that can create a Doctrine\DBAL\Connection from DB name
-     *
-     * @var DatabaseConnectionFactoryInterface
-     */
-    protected $databaseConnectionFactory;
-
     /**
      * @var LoggerInterface
      */
-    protected $logger;
+    private $logger;
 
     /**
-     * Migrator constructor.
-     *
-     * @param string $migrationSetName Name
+     * @var Connection
      */
-    public function __construct($migrationSetName)
-    {
-        $this->migrationSetName = $migrationSetName;
-    }
+    private $sourceConnection;
 
     /**
-     * @return string
+     * @var Connection
      */
-    public function getSourceDb()
-    {
-        return $this->sourceDb;
-    }
+    private $destConnection;
 
-    /**
-     * Set source DB name
-     *
-     * @param string $sourceDb Source DB name
-     *
-     * @return Migrator
-     */
-    public function setSourceDb($sourceDb)
-    {
-        $this->sourceDb = $sourceDb;
 
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDestinationDb()
-    {
-        return $this->destinationDb;
-    }
-
-    /**
-     * Set destination DB name
-     *
-     * @param string $destinationDb Destination DB name
-     *
-     * @return Migrator
-     */
-    public function setDestinationDb($destinationDb)
-    {
-        $this->destinationDb = $destinationDb;
-
-        return $this;
-    }
-
-    /**
-     * @return DatabaseConnectionFactoryInterface
-     */
-    public function getDatabaseConnectionFactory()
-    {
-        return $this->databaseConnectionFactory;
-    }
-
-    /**
-     * Set Database Connection Factory
-     *
-     * @param DatabaseConnectionFactoryInterface $databaseConnectionFactory Database Connection Factory
-     *
-     * @return Migrator
-     */
-    public function setDatabaseConnectionFactory(DatabaseConnectionFactoryInterface $databaseConnectionFactory)
-    {
-        $this->databaseConnectionFactory = $databaseConnectionFactory;
-
-        return $this;
+    public function __construct(
+        Connection $sourceConnection,
+        Connection $destConnection,
+        LoggerInterface $logger
+    ) {
+        $this->sourceConnection = $sourceConnection;
+        $this->destConnection = $destConnection;
+        $this->logger = $logger;
     }
 
     /**
      * Perform the configured migrations
      *
-     * @return void
-     *
-     * @throws \Exception Rethrows any exceptions after loggin
+     * @throws \Exception Rethrows any exceptions after logging
      */
-    public function execute()
+    public function execute(string $setName, TablesList $tableCollection, ViewsList $viewCollection): void
     {
-        $sourceConnection = $this->databaseConnectionFactory->createSourceConnectionByDbName($this->sourceDb);
-        $destConnection = $this->databaseConnectionFactory->createDestConnectionByDbName($this->destinationDb);
-
-        $setName = $this->migrationSetName;
-
-        foreach ($this->tableMigrations as $table => $sampler) {
+        foreach ($tableCollection->getTables() as $table => $sampler) {
             try {
-                $this->ensureEmptyTargetTable($table, $sourceConnection, $destConnection);
+                $this->ensureEmptyTargetTable($table, $this->sourceConnection, $this->destConnection);
                 $sampler->setTableName($table);
-                $sampler->setSourceConnection($sourceConnection);
-                $sampler->setDestConnection($destConnection);
+                $sampler->setSourceConnection($this->sourceConnection);
+                $sampler->setDestConnection($this->destConnection);
                 $rows = $sampler->execute();
-                $this->getLogger()->info("$setName: migrated '$table' with '" . $sampler->getName() . "': $rows rows");
+                $this->logger->info("$setName: migrated '$table' with '" . $sampler->getName() . "': $rows rows");
             } catch (\Exception $e) {
-                $this->getLogger()->error(
+                $this->logger->error(
                     "$setName: failed to migrate '$table' with '" . $sampler->getName() . "': " . $e->getMessage()
                 );
                 throw $e;
             }
         }
 
-        foreach ($this->viewsToMigrate as $view) {
-            $this->migrateView($view, $sourceConnection, $destConnection);
+        foreach ($viewCollection->getViews() as $view) {
+            $this->migrateView($view, $setName);
         }
 
-        $this->migrateTableTriggers($sourceConnection, $destConnection);
+        $this->migrateTableTriggers($setName, $tableCollection);
     }
 
-    /**
-     * Reset the list of table samplers to be empty
-     *
-     * @return void
-     */
-    public function clearTableMigrations()
-    {
-        $this->tableMigrations = [];
-    }
-
-    /**
-     * Reset the list of view migrations to be empty
-     *
-     * @return void
-     */
-    public function clearViewMigrations()
-    {
-        $this->viewsToMigrate = [];
-    }
-
-    /**
-     * Add a SamplerInterface object to handle a named table
-     *
-     * @param string           $table   Table name
-     * @param SamplerInterface $sampler Sampler class
-     *
-     * @return void
-     */
-    public function addTableSampler($table, SamplerInterface $sampler)
-    {
-        //TODO these might need to be in order
-        $this->tableMigrations[$table] = $sampler;
-    }
-
-    /**
-     * Add view to be migrated, by name
-     *
-     * @param string $view Name of view to add
-     *
-     * @return void
-     */
-    public function addViewToMigrate($view)
-    {
-        $this->viewsToMigrate[] = $view;
-    }
 
     /**
      * Ensure that the specified table is present in the destination DB as an empty copy of the source
      *
-     * @param string     $table            Table name
+     * @param string $table Table name
      * @param Connection $sourceConnection Originating DB connection
-     * @param Connection $destConnection   Target DB connection
+     * @param Connection $destConnection Target DB connection
      *
      * @return void
      * @throws \RuntimeException If DB type not supported
@@ -249,27 +103,24 @@ class Migrator implements LoggerAwareInterface
     /**
      * Ensure that all table triggers from source are recreated in the destination
      *
-     * @param Connection $sourceConnection Originating DB connection
-     * @param Connection $destConnection   Target DB connection
-     *
      * @return void
      * @throws \RuntimeException If DB type not supported
      * @throws \Doctrine\DBAL\DBALException If target trigger cannot be recreated
      */
-    private function migrateTableTriggers(Connection $sourceConnection, Connection $destConnection)
+    private function migrateTableTriggers(string $setName, TablesList $tableCollection): void
     {
-        foreach ($this->tableMigrations as $table => $sampler) {
+        foreach ($tableCollection->getTables() as $table => $sampler) {
             try {
-                $triggerSql = $this->generateTableTriggerSql($table, $sourceConnection);
+                $triggerSql = $this->generateTableTriggerSql($table, $this->sourceConnection);
                 foreach ($triggerSql as $sql) {
-                    $destConnection->exec($sql);
+                    $this->destConnection->exec($sql);
                 }
                 if (count($triggerSql)) {
-                    $this->getLogger()->info("$this->migrationSetName: Migrated " . count($triggerSql) . " trigger(s) on $table");
+                    $this->logger->info("$setName: Migrated " . count($triggerSql) . " trigger(s) on $table");
                 }
             } catch (\Exception $e) {
-                $this->getLogger()->error(
-                    "$this->migrationSetName: failed to migrate '$table' with '" . $sampler->getName() . "': " . $e->getMessage()
+                $this->logger->error(
+                    "$setName: failed to migrate '$table' triggers with '" . $sampler->getName() . "': " . $e->getMessage()
                 );
                 throw $e;
             }
@@ -279,7 +130,7 @@ class Migrator implements LoggerAwareInterface
     /**
      * Regenerate the SQL to create any triggers from the table
      *
-     * @param string     $table            Table name
+     * @param string $table Table name
      * @param Connection $dbConnection Originating DB connection
      *
      * @return array
@@ -294,7 +145,7 @@ class Migrator implements LoggerAwareInterface
             if ($triggers && count($triggers) > 0) {
                 foreach ($triggers as $trigger) {
                     $triggerSql[] = 'CREATE TRIGGER ' . $trigger['Trigger'] . ' ' . $trigger['Timing'] . ' ' . $trigger['Event'] .
-                        ' ON ' . $dbConnection->quoteIdentifier($trigger['Table']) . ' FOR EACH ROW ' .PHP_EOL . $trigger['Statement'] . '; ';
+                        ' ON ' . $dbConnection->quoteIdentifier($trigger['Table']) . ' FOR EACH ROW ' . PHP_EOL . $trigger['Statement'] . '; ';
                 }
             }
         } elseif ($driverName === 'pdo_sqlite') {
@@ -312,43 +163,20 @@ class Migrator implements LoggerAwareInterface
         return $triggerSql;
     }
 
-
-    /**
-     * Sets a logger instance on the object.
-     *
-     * @param LoggerInterface $logger Logger instance
-     *
-     * @return void
-     */
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
-
-    /**
-     * Safely obtain either a configured or null logger
-     *
-     * @return LoggerInterface
-     */
-    protected function getLogger()
-    {
-        return $this->logger ?: new NullLogger();
-    }
-
     /**
      * Migrate a view from source to dest DB
      *
-     * @param string     $view             Name of view to migrate
-     * @param Connection $sourceConnection Source connection
-     * @param Connection $destConnection   Destination connection
-     *
-     * @return void
+     * @param string $view Name of view to migrate
+     * @param string $setName Name of migration set being executed
      *
      * @throws \Doctrine\DBAL\DBALException If view cannot be read
      * @throws \RuntimeException For DB types where this is unsupported
      */
-    protected function migrateView($view, Connection $sourceConnection, Connection $destConnection)
+    protected function migrateView(string $view, string $setName): void
     {
+        $sourceConnection = $this->sourceConnection;
+        $destConnection = $this->destConnection;
+
         $destConnection->exec('DROP VIEW IF EXISTS ' . $sourceConnection->quoteIdentifier($view));
 
         $driverName = $sourceConnection->getDriver()->getName();
@@ -375,7 +203,6 @@ class Migrator implements LoggerAwareInterface
         }
         $destConnection->exec($createSql);
 
-        $setName = $this->migrationSetName;
         $this->logger->info("$setName: migrated view '$view'");
     }
 }
